@@ -1,0 +1,13 @@
+HELPFUL PARTS OF COMMENT:
+author
+body
+created
+created_utc
+subreddit_id (will begin with t5)
+
+OF THREAD:
+title
+selftext
+created(_utc)
+author
+permalink
