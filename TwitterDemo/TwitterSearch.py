@@ -6,7 +6,11 @@ from Tweet import Tweet
 MEDIA_URLS_ENABLED = False
 GEOCODES_ENABLED = False
 
-class TwitterSearch(object):		
+class TwitterSearch(object):	
+
+	def __init__(self):
+		self.tweetCount = 0
+		
 	def api_rate_limit_sleep(self, api):
 		rate_limit_status = api.GetRateLimitStatus()
 		reset_time = rate_limit_status['resources']['search']['/search/tweets']['reset']
@@ -40,6 +44,7 @@ class TwitterSearch(object):
 		return None
 		
 	def get_100_search_results(self, api, query, starting_id=None):
+		#print "Fetching next batch of tweets.."
 		params = { 'term' : query,
 					'count' : 100,
 					'lang' : 'en',
@@ -53,15 +58,24 @@ class TwitterSearch(object):
 		results = api.GetSearch(**params)
 		return results
 		
-	def update_Tweets_list(self, search_results, tweets):
-		try:
-			for result in search_results:
-				tweet = self.create_Tweet_object(result)
-				tweets.append(tweet)			
-		except KeyboardInterrupt:
-			print "\n Terminated by user (update_Tweets_list)\n"
-			raise KeyboardInterrupt
-		return tweets	
+	def store_tweets_in_database(self, tweets, db, query):
+		#print "Storing tweets in db.."
+		for tweet in tweets:
+			username = tweet.api_tweet_data.user.screen_name.encode('utf-8')
+			post_text = tweet.api_tweet_data.text.encode('utf-8').replace("'", "''")
+			db.add_post(username, 'Twitter', post_text, query)
+			self.tweetCount += 1
+
+		print str(self.tweetCount) + " tweets gathered.."
+		
+	def create_Tweet_objects(self, search_results):
+		#print "Creating tweet objects.."
+	
+		tweets = []
+		for search_result in search_results:
+			tweet = self.create_Tweet_object(search_result)
+			tweets.append(tweet)
+		return tweets
 		
 	def create_Tweet_object(self, search_result):
 		media_urls = None
@@ -76,19 +90,17 @@ class TwitterSearch(object):
 		return tweet
 
 class BasicTwitterSearch(TwitterSearch):
-	def search(self, api, query):
-		tweets = []
-		
+
+	def search(self, api, query, db):
 		# Get 100 (max) most recent results
-		results = self.get_first_100_results(api, query, tweets)
+		results = self.get_first_100_results(api, query, db)
 			
-		if len(tweets) < 100:
-			return tweets
+		if self.tweetCount < 100:
+			return self.tweetCount
 
 		# Get next 100 results ignoring ones already found, and so on...
 		try:
-			self.get_next_100_results(api, query, results, tweets)		
-			
+			self.get_next_100_results(api, query, results, db)			
 		except KeyboardInterrupt:
 			print('\n Terminated by user (search)\n')
 		except MemoryError:
@@ -97,28 +109,14 @@ class BasicTwitterSearch(TwitterSearch):
 			print('\n Terminated due to error\n')
 			print str(e)
 
-		return tweets
-
-	def get_next_100_results(self, api, query, results, tweets):
-		while (len(results) == 100):
-			lowest_id = results[99].GetId()
-			
-			try:
-				results = super(BasicTwitterSearch, self).get_100_search_results(api, query, lowest_id)
-			except twitter.TwitterError as e:
-				super(BasicTwitterSearch, self).api_rate_limit_sleep(api)
-				continue
-			
-			super(BasicTwitterSearch, self).update_Tweets_list(results, tweets)
-			
-			print str(len(tweets)) + " tweets gathered.."
+		return self.tweetCount
 		
-		
-	def get_first_100_results(self, api, query, tweets):
+	def get_first_100_results(self, api, query, db):
 		results = []
 		try:
 			results = super(BasicTwitterSearch, self).get_100_search_results(api, query)
-			super(BasicTwitterSearch, self).update_Tweets_list(results, tweets)
+			tweets = super(BasicTwitterSearch, self).create_Tweet_objects(results)
+			super(BasicTwitterSearch, self).store_tweets_in_database(tweets, db, query)
 		except KeyboardInterrupt:
 			print ('\n Terminated by user (search)\n')
 		except twitter.TwitterError as e:
@@ -128,9 +126,22 @@ class BasicTwitterSearch(TwitterSearch):
 			except KeyboardInterrupt:
 				return results
 			
-			return self.get_first_100_results(api, query, tweets)
+			return self.get_first_100_results(api, query, db)
 		return results
 		
+	def get_next_100_results(self, api, query, results, db):
+		while (len(results) == 100):
+			lowest_id = results[99].GetId()
+			
+			try:
+				results = super(BasicTwitterSearch, self).get_100_search_results(api, query, lowest_id)
+				tweets = super(BasicTwitterSearch, self).create_Tweet_objects(results)
+				super(BasicTwitterSearch, self).store_tweets_in_database(tweets, db, query)
+			except twitter.TwitterError as e:
+				super(BasicTwitterSearch, self).api_rate_limit_sleep(api)
+				continue
+		
+
 '''
 class SearchLastXDays(object):
 	# search

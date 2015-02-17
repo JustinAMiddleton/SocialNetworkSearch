@@ -13,11 +13,10 @@ class TwitterCrawler(object):
 		return self.api
 	
 	# Search
-	def BasicSearch(self, query):
+	def BasicSearch(self, query, db):
 		self.query = query
 		search = TwitterSearch.BasicTwitterSearch()
-		tweets = search.search(self.api, query)
-		return tweets
+		return search.search(self.api, query, db)
 	
 	# SearchLastXDays
 	# SearchDateRange
