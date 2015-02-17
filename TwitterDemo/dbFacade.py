@@ -72,22 +72,3 @@ class dbFacade(object):
 				PRIMARY KEY (id, username)	
 			);
 			""" % self.keyspace)
-			
-def main():
-	db = dbFacade()
-	db.connect()
-	
-	print "Connected."
-	
-	db.create_keyspace_and_schema()
-	print "Schema created"
-	time.sleep(1)
-	db.add_user('tom', 105, "Twitter")
-	print "Inserted"
-	time.sleep(1)
-	db.get_users()
-	time.sleep(1)
-	db.close()
-
-if __name__ == "__main__":
-	main()
