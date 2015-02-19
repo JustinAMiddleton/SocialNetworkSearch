@@ -6,16 +6,17 @@ def main(wordDeck):
     emailMainDirectory = '/users/lukelindsey/Downloads/enron_mail_20110402/maildir/'
     for userDir in os.listdir(emailMainDirectory):
         for sentFolder, noDirectories, emailFiles in os.walk(emailMainDirectory + userDir + '/sent/'):  # there are more sent folders than this, let's start small though
-            print userDir  # this is the user that sent the email
+            print userDir  # this is the user that sent the email, printing to make sure all folders are being searched, remove later
             for emailFileName in emailFiles:
                 emailFile = open((emailMainDirectory + userDir + '/sent/' + emailFileName), 'r')
                 email = emailFile.read()
-                print email
+                #print email
                 # for word in wordDeck:
                     # if word in email:
                         #************ FIND SENTENCE WHERE WORD IS USED
+                emailFile.close()
             # dashes separate users while we are printing, take this out when useful stuff is done
-            print '---------------------------------------------------------------------'
+            #print '---------------------------------------------------------------------'
 
 
 main(['this']) # just a placeholder for now
