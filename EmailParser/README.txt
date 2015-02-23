@@ -20,10 +20,16 @@ a to do section is at the bottom.
         method that doesn't have any functionality but will need to
         be implemented soon
 
+2/23/15 @ 1630:
+        - renamed removeReplies to formatEmail
+        - fixed bug where individual sentences weren't being checked
+
+
+
 
 TODO:
     - remove replies
     - send sentence (along with info) along to DB
     - improve performance
-    - elastic searching
+    - elastic searching/case ignore
 
