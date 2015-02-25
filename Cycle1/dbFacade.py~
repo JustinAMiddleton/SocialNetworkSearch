@@ -55,7 +55,6 @@ class dbFacade(object):
 	def get_users_dict(self):
 		self.session.row_factory = cassandra.query.dict_factory
 		users = self.get_users()
-		#self.session.row_factory = cassandra.query.named_tuple_factory
 		return users
 
 	def get_scored_users(self):

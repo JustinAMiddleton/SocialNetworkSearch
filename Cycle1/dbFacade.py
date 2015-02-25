@@ -134,3 +134,20 @@ class dbFacade(object):
 				PRIMARY KEY (username, id)	
 			);
 			""" % self.keyspace)
+
+	def clearDatabase(self):
+		keyspaces = self.getKeyspaceNames()
+		
+		for keyspace in keyspaces:
+			if "search" in keyspace:
+				self.session.execute("""DROP KEYSPACE %s;""" % keyspace)
+					
+	def getKeyspaceNames(self):
+		keys = self.session.execute("""
+			SELECT * FROM system.schema_keyspaces;"""); 
+			
+		keyspaces = []
+		for key in keys:
+			keyspaces.append(key.keyspace_name)
+			
+		return keyspaces
