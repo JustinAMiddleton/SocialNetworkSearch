@@ -7,17 +7,17 @@ USE:
 
 FILES:
 
-	Interface.py	 		=> Main controlling class; starts and stops operation
-	dbFacade.py	 		=> Facade class for database queries
-	Scorer.py	 		=> Class for scoring textual posts
-	CrawlThread.py	 		=> Interface/Base class for social media crawling threads
-	TwitterThread.py 		=> Twitter crawling thread implementation class
+Interface.py	 		=> Main controlling class; starts and stops operation
+dbFacade.py	 		=> Facade class for database queries
+Scorer.py	 		=> Class for scoring textual posts
+CrawlThread.py	 		=> Interface/Base class for social media crawling threads
+TwitterThread.py 		=> Twitter crawling thread implementation class
 
-	TwitterDemo			=> Folder containing Twitter crawling files
-	TwitterDemo/Tweet.py		=> Class representing one Tweet post object
-	TwitterDemo/TwitterCrawler.py	=> Class for controlling twitter crawling
-	TwitterDemo/TwitterSearch.py	=> Contains Classes defining types of Twitter crawl searches
-						(Currently only one type of search)
+TwitterDemo			=> Folder containing Twitter crawling files
+TwitterDemo/Tweet.py		=> Class representing one Tweet post object
+TwitterDemo/TwitterCrawler.py	=> Class for controlling twitter crawling
+TwitterDemo/TwitterSearch.py	=> Contains Classes defining types of Twitter crawl searches
+					(Currently only one type of search)
 
 
 			
