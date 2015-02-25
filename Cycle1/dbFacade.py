@@ -73,7 +73,7 @@ class dbFacade(object):
 		self.session.execute("""
 				INSERT INTO %s.scored_users (username, score, website) 
 				VALUES ('%s', %s, '%s');
-				""" % (self.keyspace, username, int(score), website))
+				""" % (self.keyspace, username, float(score), website))
 	
 	'''
 	This function should possibly be in Scorer instead of dbFacade
@@ -108,7 +108,7 @@ class dbFacade(object):
 		self.session.execute("""
 			CREATE TABLE %s.scored_users (
 				username text,
-				score int,
+				score float,
 				website text,
 				PRIMARY KEY (website, score, username)
 			) WITH CLUSTERING ORDER BY (score DESC);
@@ -118,7 +118,7 @@ class dbFacade(object):
 			CREATE TABLE %s.users (
 				username text,
 				website text,
-				score int,
+				score float,
 				PRIMARY KEY (username, website)
 			);
 			""" % self.keyspace)
@@ -130,7 +130,7 @@ class dbFacade(object):
 				website text,
 				content text,
 				query text,
-				score int,
+				score float,
 				PRIMARY KEY (username, id)	
 			);
 			""" % self.keyspace)

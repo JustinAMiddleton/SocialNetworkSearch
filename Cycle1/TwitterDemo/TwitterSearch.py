@@ -72,10 +72,10 @@ class TwitterSearch(object):
 			username = tweet.api_tweet_data.user.screen_name.encode('utf-8')
 			post_text = tweet.api_tweet_data.text.encode('utf-8').replace("'", "''")
 			try:
-				score = int(scorer.score(post_text))
+				score = float(scorer.score(post_text))
 			except UnicodeDecodeError:
 				post_text = post_text.decode('utf-8')
-				score = int(scorer.score(post_text))
+				score = float(scorer.score(post_text))
 			
 			db.add_post(username, 'Twitter', post_text, query, score)
 			db.add_user(username, 0, 'Twitter')

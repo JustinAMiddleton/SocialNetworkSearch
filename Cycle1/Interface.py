@@ -68,7 +68,7 @@ class Interface:
 		# Retrieve and print top 10 scores
 		users = self.db.get_scored_users()
 		for i in range(0,len(users)):
-			print "[%s] %s" % (str(users[i]['score']), users[i]['username'])
+			print "[%s] %s" % (str(round(users[i]['score'],1)), users[i]['username'])
 
 	'''
 	Takes wordlist and forms OR search query string.
