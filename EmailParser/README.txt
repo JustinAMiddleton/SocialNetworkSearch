@@ -24,12 +24,16 @@ a to do section is at the bottom.
         - renamed removeReplies to formatEmail
         - fixed bug where individual sentences weren't being checked
 
-
+2/26/15 @ 0037:
+        - took out an unnecessary "if" statement
+        - added directory as an argument with a default value
+        - added a line to allow run on mine and Brenden's with no edits to the code
+        - changed function names and variable names to more pythonic style
+        - other cleanup
 
 
 TODO:
     - remove replies
-    - send sentence (along with info) along to DB
     - improve performance
     - elastic searching/case ignore
 

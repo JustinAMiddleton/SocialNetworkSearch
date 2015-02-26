@@ -1,50 +1,53 @@
 import os
 import re
-import threading    # could need for multithreading, not used yet. here is some threading info http://stackoverflow.com/questions/1190206/threading-in-python
 from nltk.tokenize import sent_tokenize
 from dbFacade import dbFacade
 
-def searchEnron(wordDeck, db):
 
-	# Ubuntu
-	emailMainDirectory = r'/users/lukelindsey/Downloads/enron_mail_20110402/maildir/'
-	
-	# Windows
-	emailMainDirectory = "C:\\Users\\Brenden\\Downloads\\enron\\enron_mail_20110402\\maildir\\"
-	
-	mySentFolder = r'/sent/'
+def search_enron(word_deck, db, email_main_directory='/users/lukelindsey/Downloads/enron_mail_20110402/maildir/'):
 
-	for userDir in os.listdir(emailMainDirectory):
-		for sentFolder, noDirectories, emailFiles in os.walk(emailMainDirectory + userDir + mySentFolder):  # there are more sent folders than this, let's start small though
-			#print userDir  # this is the user that sent the email, printing to make sure all folders are being searched, remove later
-			for emailFileName in emailFiles:
-				emailFile = open((sentFolder + emailFileName), 'r')
-				email = emailFile.read()
-				emailFile.close()
-				processEmail(email, userDir, wordDeck)
-
-def processEmail(email, user, wordDeck):
-    #make sure we only get the part of email we want
-    email = formatEmail(email)
+	# Windows (Brenden's machine)
+	if os.name == 'nt':
+		email_main_directory = "C:\\Users\\Brenden\\Downloads\\enron\\enron_mail_20110402\\maildir\\"
 	
-    for word in wordDeck:
-        if word in email:
-            sentences = extractSentences(word, email)
-            for sentence in sentences:
-                if word in sentence:
-					print sentence
+	my_sent_folder = r'/sent/'  # there are more sent folders than this, let's start small though
+
+	user_directory_list = os.listdir(email_main_directory)
+
+	for user_dir in user_directory_list:
+		for sent_folder, no_directories, email_files in os.walk(email_main_directory + user_dir + my_sent_folder):
+			for email_file_name in email_files:
+				email_file = open((sent_folder + email_file_name), 'r')
+				email = email_file.read()
+				email_file.close()
+				process_email(email, user_dir, word_deck)
+
+
+def process_email(email, user, word_deck):
+
+	email = format_email(email)  # remove the junk
+
+	for word in word_deck:
+		if word in email:
+			sentences = extract_sentences(word, email)
+			for sentence in sentences:
+				if word in sentence:
+					#score here?
 					db.add_post(user, "Enron", sentence, word)
 
-"""This method returns a generator of sentences that contain the
-word passed in as a parameter"""
-def extractSentences(wordIn, emailIn):
-    sentenceList = sent_tokenize(emailIn)
-    for sentence in sentenceList:
-        if wordIn in sentence:
-            yield sentence
 
-def formatEmail(text):
-	'''@ GITHUB -> inkhorn / enron processing.py '''
+def extract_sentences(word_to_search, email):
+	"""This method returns a generator of sentences that contain the
+	word passed in as a parameter"""
+
+	sentence_list = sent_tokenize(email)
+	for sentence in sentence_list:
+		if word_to_search in sentence:
+			yield sentence
+
+
+def format_email(text):
+	"""@ GITHUB -> inkhorn / enron processing.py """
 	# remove headers
 	text = text[text.find("\n\n"):]
 
@@ -65,7 +68,7 @@ def formatEmail(text):
 	forwardedby_pat = re.compile(".+------------.+\n")
 	caution_pat = re.compile('''\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*.+\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*''')
 	privacy_pat = re.compile(" _______________________________________________________________.+ _______________________________________________________________")
-	 
+
 	# regular expression cleanup
 	text = to_pat.sub('', text)
 	text = cc_pat.sub('', text)
@@ -82,7 +85,7 @@ def formatEmail(text):
 	text = forwardedby_pat.sub('', text)
 	text = caution_pat.sub('', text)
 	text = privacy_pat.sub('', text)
-	text = text.replace("-----Original Message-----","")
+	text = text.replace("-----Original Message-----", "")
 
 	# remove some excessive whitespace
 	text = text.replace('\n', ' ')
@@ -96,6 +99,6 @@ db.connect()
 db.create_keyspace_and_schema()
 
 try:
-	searchEnron(['random'], db) # just a placeholder for now
+	search_enron(['random'], db)  # just a placeholder for now
 except KeyboardInterrupt:
 	print "\n\tTerminated by user"
