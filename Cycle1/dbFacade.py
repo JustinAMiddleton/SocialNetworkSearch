@@ -1,5 +1,6 @@
 from cassandra.cluster import Cluster
 import cassandra.cluster
+import cassandra.query
 import time
 import uuid
 
@@ -46,15 +47,20 @@ class dbFacade(object):
 			VALUES (%s, '%s', '%s', '%s', '%s', %s);
 			""" % (self.keyspace, uuid.uuid1(), username, website, content, query, score))
 	
-	def get_users(self):
-		results = self.session.execute("""
-				SELECT * FROM %s.users;
-				""" % self.keyspace)
-		return results
+	def get_users(self):	
+		query = "SELECT * FROM %s.users;" % self.keyspace
+		statement = cassandra.query.SimpleStatement(query)
+		
+		users = []		
+		for user in self.session.execute(statement):
+			users.append(user)
+
+		return users
 	
 	def get_users_dict(self):
 		self.session.row_factory = cassandra.query.dict_factory
 		users = self.get_users()
+
 		return users
 
 	def get_scored_users(self):
@@ -74,7 +80,7 @@ class dbFacade(object):
 				INSERT INTO %s.scored_users (username, score, website) 
 				VALUES ('%s', %s, '%s');
 				""" % (self.keyspace, username, float(score), website))
-	
+
 	'''
 	This function should possibly be in Scorer instead of dbFacade
 	'''
