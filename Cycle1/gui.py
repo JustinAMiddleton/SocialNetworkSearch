@@ -8,6 +8,7 @@ Created on Feb 18, 2015
 
 from Tkinter import *
 from Interface import Interface
+import time
 
 class App():
 	attribute1 = "Attribute 1"
@@ -136,9 +137,6 @@ class App():
 		self.weights = newWeights
 		self.sentiments = newSentiments
 		self.attribute1_values = zip(self.words,self.weights,self.sentiments)
-
-		print self.attribute1_values
-		print zip(self.words, self.weights, self.sentiments)
 
 		
 		

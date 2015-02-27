@@ -34,12 +34,7 @@ class Interface:
 		self.db.create_keyspace_and_schema()
 		self.twitterCrawler = TwitterCrawler()
 		self.twitterCrawler.login()
-		print 
-		print zip(words,weights,sentiments)
-		print
 		self.scorer = Scorer(zip(words,weights,sentiments))
-		raw_input()
-		#query = self.get_query(words)
 	
 	'''
 	Starts search crawling threads with inputed query string.
