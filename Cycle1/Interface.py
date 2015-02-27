@@ -19,14 +19,28 @@ weights = [1,3,2,2]
 targetSentiment = [1,1,1,1]    
 
 class Interface:
-	def __init__(self):
+	'''def __init__(self):
 		self.db = dbFacade()
 		self.db.connect()
 		self.db.create_keyspace_and_schema()
 		self.twitterCrawler = TwitterCrawler()
 		self.twitterCrawler.login()
-		self.scorer = Scorer(zip(words, weights, targetSentiment))
+		self.scorer = Scorer(zip(words, weights, targetSentiment))'''
+		
 
+	def __init__(self, words, weights, sentiments):
+		self.db = dbFacade()
+		self.db.connect()
+		self.db.create_keyspace_and_schema()
+		self.twitterCrawler = TwitterCrawler()
+		self.twitterCrawler.login()
+		print 
+		print zip(words,weights,sentiments)
+		print
+		self.scorer = Scorer(zip(words,weights,sentiments))
+		raw_input()
+		#query = self.get_query(words)
+	
 	'''
 	Starts search crawling threads with inputed query string.
 	'''
