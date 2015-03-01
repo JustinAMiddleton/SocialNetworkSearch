@@ -9,6 +9,23 @@ Created on Feb 18, 2015
 from Tkinter import *
 from Interface import Interface
 import time
+import threading
+
+class GuiThread(threading.Thread):
+	def __init__(self, words, weights, sentiments):
+		threading.Thread.__init__(self)
+		self.words = words
+		self.weights = weights
+		self.sentiments = sentiments
+	def run(self):
+		zip(self.words,self.weights,self.sentiments)
+		self.interface = Interface(self.words, self.weights, self.sentiments)
+		self.interface.search(self.interface.get_query(self.words))
+		self.interface.score()
+		self.interface.db.close()
+		time.sleep(1)
+	def stop(self):
+		self.interface.stop_search()
 
 class App():
 	attribute1 = "Attribute 1"
@@ -45,17 +62,19 @@ class App():
 
 		var3 = IntVar()
 		Checkbutton(frame, text="Reddit", variable=var3).grid(row=3, column=3, sticky=W, padx=15)'''
-
+		
 	def search(self):
-		zip(self.words,self.weights,self.sentiments)
+		self.thread = GuiThread(self.words, self.weights, self.sentiments)
+		self.thread.start()
+		'''zip(self.words,self.weights,self.sentiments)
 		self.interface = Interface(self.words, self.weights, self.sentiments)
 		self.interface.search(self.interface.get_query(self.words))
 		self.interface.score()
 		self.interface.db.close()
-		time.sleep(1)
+		time.sleep(1)'''
 
 	def stop(self):
-		self.interface.stop_search()
+		self.thread.stop()
 
 	def defineAttribute(self): #attribute window
 		toplevel= Toplevel()

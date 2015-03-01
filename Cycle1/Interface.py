@@ -42,14 +42,15 @@ class Interface:
 	def search(self, query):
 		self.twitterThread = TwitterThread(self.twitterCrawler, self.db, self.scorer, query)
 		self.twitterThread.start()
+		self.twitterThread.join()
 
-		# End Twitter search thread with Ctrl+C; temporary
+		'''# End Twitter search thread with Ctrl+C; temporary
 		while(True):
 			try:
 				time.sleep(1)
 			except KeyboardInterrupt:
 				self.stop_search()
-				break
+				break'''
 
 	'''
 	Ends search crawling threads; 
