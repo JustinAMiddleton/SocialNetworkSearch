@@ -117,7 +117,7 @@ class App():
 					self.get_control_values(sentiments)
 				))'''
 		set_attribute = lambda: self.set_attribute_values(wordBoxes, weights, sentiments)
-	
+
 		Button(frame, text="Save", command=set_attribute).grid(row=4, column=2,pady=10)
 
 	def get_control_values(self, controls):
@@ -141,7 +141,7 @@ class App():
 		for weight in weights:
 			if weight.get()== "High":
 				newWeights.append(3)
-			if weight.get() == "Medium":
+			elif weight.get() == "Medium":
 				newWeights.append(2)
 			else:
 				newWeights.append(1)
@@ -155,10 +155,7 @@ class App():
 
 		self.weights = newWeights
 		self.sentiments = newSentiments
-		self.attribute1_values = zip(self.words,self.weights,self.sentiments)
-
-		
-		
+		self.attribute1_values = zip(self.words,self.weights,self.sentiments)		
 
 
 root=Tk()
