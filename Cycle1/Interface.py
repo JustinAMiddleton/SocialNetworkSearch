@@ -19,7 +19,7 @@ social media crawling and analysis
 words = ['pizza']
 weights = [1,3,2,2]
 targetSentiment = [1,1,1,1]    
-args = { 'location' : "usa" }
+args = { 'location' : None }
 
 class Interface:
 	'''

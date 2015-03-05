@@ -17,7 +17,7 @@ class GuiThread(threading.Thread):
 		self.words = words
 		self.weights = weights
 		self.sentiments = sentiments
-		self.args = {'location' : 'China'}
+		self.args = {'location' : None}
 	def run(self):
 		zip(self.words,self.weights,self.sentiments)
 		self.interface = Interface(self.words, self.weights, self.sentiments)
