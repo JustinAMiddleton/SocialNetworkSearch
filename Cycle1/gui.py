@@ -10,6 +10,9 @@ from Tkinter import *
 from Interface import Interface
 import time
 import threading
+import thread
+import sys
+import Queue
 
 class GuiThread(threading.Thread):
 	def __init__(self, words, weights, sentiments):
@@ -29,69 +32,92 @@ class GuiThread(threading.Thread):
 	def stop(self):
 		self.interface.stop_search()
 
+class ThreadSafeConsole(Text):
+    def __init__(self, master, **options):
+        Text.__init__(self, master, **options)
+        self.queue = Queue.Queue()
+        self.update_me()
+    def write(self, line):
+        self.queue.put(line)
+    def clear(self):
+        self.queue.put(None)
+    def update_me(self):
+        try:
+            while 1:
+                line = self.queue.get_nowait()
+                if line is None:
+                    self.delete(1.0, END)
+                else:
+                    self.insert(END, str(line))
+                self.see(END)
+                self.update_idletasks()
+        except Queue.Empty:
+            pass
+        self.after(100, self.update_me)
+
 class App():
 	attribute1 = "Attribute 1"
 	defAtt = "Define Attribute"
 
-	attribute1_values = [["","","Positive"],["","","Positive"],["","","Positive"],["","","Positive"]]
+	attribute1_values = [["","High","Positive"],
+				["","High","Positive"],
+				["","High","Positive"],
+				["","High","Positive"]]
 	words = []
 	weights = []
 	sentiments = []
-
-	def __init__(self, master): #main window
-
-		frame = Frame(master)
-		frame.pack()
+	
+	def __init__(self, master): 
+		self.frame = Frame(master)
+		self.frame.pack()
 		master.title("Whistleblower Analysis")
-		#Label(frame, text="Attributes").grid(row=0, column=0, pady=4)
-		#Label(frame, text="Web Sites").grid(row=0, column=3)
-		Label(frame, text="Attribute").grid(row=1, column=0)
-		Button(frame, text=self.defAtt, command=self.defineAttribute).grid(row=1, column=1,pady=4, padx=10)
-		#Button(frame, text="X").grid(row=1, column=2, padx=5)
-		Button(frame, text="Search", command=self.search).grid(row=2, column=0, padx=10)
-		Button(frame, text="Stop", command=self.stop).grid(row=2, column=1, pady=4)
-		
-		'''var=StringVar(master)
-		var.set("Select Date")
-	 	option = OptionMenu(frame, var, "Live Stream", "Last 30 Days", 
-					"Last 90 Days", "Past Year").grid(row=4, column=3)
 
-		var1 = IntVar()
-		Checkbutton(frame, text="Twitter", variable=var1).grid(row=1, column=3, sticky=W, padx=15)
-		var2 = IntVar()
+		self.create_output_window()
+		self.create_main_window_controls()
 
-		Checkbutton(frame, text="Google+", variable=var2).grid(row=2, column=3, sticky=W, padx=15)
-
-		var3 = IntVar()
-		Checkbutton(frame, text="Reddit", variable=var3).grid(row=3, column=3, sticky=W, padx=15)'''
-		
 	def search(self):
 		self.thread = GuiThread(self.words, self.weights, self.sentiments)
 		self.thread.start()
-		'''zip(self.words,self.weights,self.sentiments)
-		self.interface = Interface(self.words, self.weights, self.sentiments)
-		self.interface.search(self.interface.get_query(self.words))
-		self.interface.score()
-		self.interface.db.close()
-		time.sleep(1)'''
 
 	def stop(self):
-		self.thread.stop()
+		self.thread.stop()		
 
-	def defineAttribute(self): #attribute window
+	def create_main_window_controls(self):
+		Label(self.frame, text="Attribute").grid(row=0, column=0, sticky=E)
+		Button(self.frame, text=self.defAtt, 
+			command=self.create_attribute_window).grid(row=0, column=1,sticky=W+N)
+
+		Button(self.frame, text="Search", 
+			command=self.search).grid(row=4, column=0, 
+						columnspan=2, sticky=W+E+S, pady=30)
+		Button(self.frame, text="Stop", 
+			command=self.stop).grid(row=4, column=0,
+						columnspan=2, sticky=W+E+S)
+
+	def create_output_window(self):
+		toplevel= Toplevel()
+		toplevel.title('Output')
+		toplevel.focus_set()
+		output_frame = Frame(toplevel)
+		output_frame.pack()
+
+		self.widget = ThreadSafeConsole(output_frame, height=30, width=50)
+		self.widget.grid(column=0, row=5, columnspan=2)
+		sys.stdout = self.widget
+
+	def create_attribute_window(self): 
 		toplevel= Toplevel()
 		toplevel.title('Define Attribute')
-		toplevel.geometry('510x170-50+40')
 		toplevel.focus_set()
-		frame = Frame(toplevel)
-		frame.pack()
+		self.attribute_frame = Frame(toplevel)
+		self.attribute_frame.pack()
 
 		wordBoxes = []
 		weights = []
 		sentiments = []
 		for i in range(0,4):
-			Label(frame, text="Word "+str(i+1)).grid(row=i, column=0)
-			wordBox = Entry(frame)
+			Label(self.attribute_frame, text="Word "+str(i+1)).grid(row=i, column=0)
+			wordBox = Entry(self.attribute_frame)
 			wordBox.insert(0, self.attribute1_values[i][0])
 			wordBox.grid(row=i, column=1)
 			wordBoxes.append(wordBox)
@@ -100,27 +126,21 @@ class App():
 			var1.set("Weight")
 			if (self.attribute1_values[i][1] != ""):
 				var1.set(self.attribute1_values[i][1])
-			weight = OptionMenu(frame, var1, "High", "Medium", "Low")
+			weight = OptionMenu(self.attribute_frame, var1, "High", "Medium", "Low")
 			weight.config(width=7)
 			weight.grid(row=i, column=2)
 			weights.append(var1)
 			
 			sentimentStr = StringVar(toplevel)
 			sentimentStr.set(self.attribute1_values[i][2])
-			sentiment = OptionMenu(frame, sentimentStr, "Positive", "Negative")
+			sentiment = OptionMenu(self.attribute_frame, sentimentStr, "Positive", "Negative")
 			sentiment.config(width=7)
 			sentiment.grid(row=i, column=3)
 			sentiments.append(sentimentStr)
 
-		'''set_attribute= lambda: self.set_attribute_values(
-				zip(
-					self.get_control_values(wordBoxes),
-					self.get_control_values(weights),
-					self.get_control_values(sentiments)
-				))'''
 		set_attribute = lambda: self.set_attribute_values(wordBoxes, weights, sentiments)
 
-		Button(frame, text="Save", command=set_attribute).grid(row=4, column=2,pady=10)
+		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=4, column=0,pady=10, padx=5)
 
 	def get_control_values(self, controls):
 		values = []
@@ -128,13 +148,6 @@ class App():
 			value = control.get()
 			values.append(value)
 		return values
-
-	def get_wordbox_values(self, boxes):
-		words = []
-		for box in boxes:
-			word = box.get()
-			words.append(word)
-		return words
 
 	def set_attribute_values(self, words, weights, sentiments):
 		self.words = self.get_control_values(words)
@@ -157,7 +170,7 @@ class App():
 
 		self.weights = newWeights
 		self.sentiments = newSentiments
-		self.attribute1_values = zip(self.words,self.weights,self.sentiments)		
+		self.attribute1_values = zip(self.words,self.weights,self.sentiments)
 
 
 root=Tk()

@@ -2,7 +2,7 @@ from TwitterDemo.TwitterCrawler import TwitterCrawler
 from TwitterThread import TwitterThread
 from dbFacade import dbFacade
 from Scorer import Scorer
-from Geocoder import Geocoder
+from TwitterGeoPics.Geocoder import Geocoder
 import time
 import thread
 import cassandra
