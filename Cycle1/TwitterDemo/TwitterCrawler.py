@@ -1,5 +1,5 @@
 import twitter
-import TwitterSearch
+from BasicSearch import BasicSearch
 
 class TwitterCrawler(object):
 
@@ -14,6 +14,5 @@ class TwitterCrawler(object):
 	
 	# Search
 	def BasicSearch(self, query, db, scorer):
-		self.query = query
-		search = TwitterSearch.BasicTwitterSearch()
-		return search.search(self.api, query, db, scorer)
+		search = BasicSearch(self.api, query, db, scorer)
+		return search.search()
