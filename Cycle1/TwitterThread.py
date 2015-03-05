@@ -2,6 +2,7 @@ import threading
 import ctypes
 import inspect
 from CrawlThread import CrawlThread
+from TwitterGeoPics.Geocoder import Geocoder
 
 '''
 This class inherets the CrawlThread interface and
@@ -13,19 +14,25 @@ defines and controls Twitter crawler search threads.
 
 class TwitterThread(CrawlThread):
 
-	def __init__(self, crawler, db, scorer, query):
+	def __init__(self, crawler, db, scorer, query, args=None):
 		threading.Thread.__init__(self)
 		self.crawler = crawler
 		self.db = db
 		self.scorer = scorer
 		self.query = query
+		self.args = args
 
+		if self.args['location']:
+			self.set_location_argument()
 	def run(self):
-		try:
-			print "Starting Twitter Thread"
-			tweetCount = self.crawler.BasicSearch(self.query, self.db, self.scorer)
-		except KeyboardInterrupt:
-			print "Thread ended by main"
+		self.crawler.BasicSearch(self.db, self.scorer, self.query, self.args)
+
+	def set_location_argument(self):
+		geocoder = Geocoder()
+		lat, lng, radius = geocoder.get_region_circle(self.args['location'])
+		region = (lat, lng, str(radius)+"km")
+		self.args['location'] = region
+
 
     	
 

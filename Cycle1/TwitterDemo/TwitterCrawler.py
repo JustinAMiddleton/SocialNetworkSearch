@@ -13,6 +13,6 @@ class TwitterCrawler(object):
 		return self.api
 	
 	# Search
-	def BasicSearch(self, query, db, scorer):
-		search = BasicSearch(self.api, query, db, scorer)
+	def BasicSearch(self, db, scorer, query, args):
+		search = BasicSearch(self.api, db, scorer, query, args)
 		return search.search()

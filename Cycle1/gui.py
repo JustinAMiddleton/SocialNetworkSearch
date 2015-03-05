@@ -17,10 +17,12 @@ class GuiThread(threading.Thread):
 		self.words = words
 		self.weights = weights
 		self.sentiments = sentiments
+		self.args = {'location' : 'China'}
 	def run(self):
 		zip(self.words,self.weights,self.sentiments)
 		self.interface = Interface(self.words, self.weights, self.sentiments)
-		self.interface.search(self.interface.get_query(self.words))
+		self.query = self.interface.get_query(self.words)
+		self.interface.search(self.query, self.args)
 		self.interface.score()
 		self.interface.db.close()
 		time.sleep(1)

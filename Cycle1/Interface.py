@@ -2,7 +2,9 @@ from TwitterDemo.TwitterCrawler import TwitterCrawler
 from TwitterThread import TwitterThread
 from dbFacade import dbFacade
 from Scorer import Scorer
+from Geocoder import Geocoder
 import time
+import thread
 import cassandra
 
 '''
@@ -14,19 +16,20 @@ social media crawling and analysis
 '''
 
 # For testing purposes
-words = ['tacos', 'pizza', 'burgers', 'fries']
+words = ['pizza']
 weights = [1,3,2,2]
 targetSentiment = [1,1,1,1]    
+args = { 'location' : "usa" }
 
 class Interface:
-	'''def __init__(self):
+	'''
+	def __init__(self):
 		self.db = dbFacade()
 		self.db.connect()
-		self.db.create_keyspace_and_schema()
+		self.db.create_keyspace_and_schema()		
+		self.scorer = Scorer(zip(words, weights, targetSentiment))
 		self.twitterCrawler = TwitterCrawler()
-		self.twitterCrawler.login()
-		self.scorer = Scorer(zip(words, weights, targetSentiment))'''
-		
+		self.twitterCrawler.login()'''
 
 	def __init__(self, words, weights, sentiments):
 		self.db = dbFacade()
@@ -36,21 +39,14 @@ class Interface:
 		self.twitterCrawler.login()
 		self.scorer = Scorer(zip(words,weights,sentiments))
 	
+	
 	'''
 	Starts search crawling threads with inputed query string.
 	'''
-	def search(self, query):
-		self.twitterThread = TwitterThread(self.twitterCrawler, self.db, self.scorer, query)
+	def search(self, query, args):
+		self.twitterThread = TwitterThread(self.twitterCrawler, self.db, self.scorer, query, args)
 		self.twitterThread.start()
 		self.twitterThread.join()
-
-		'''# End Twitter search thread with Ctrl+C; temporary
-		while(True):
-			try:
-				time.sleep(1)
-			except KeyboardInterrupt:
-				self.stop_search()
-				break'''
 
 	'''
 	Ends search crawling threads; 
@@ -59,6 +55,7 @@ class Interface:
 	def stop_search(self):
 		print "Closing threads.."
 		self.twitterThread.raiseExc(KeyboardInterrupt)
+			
 
 		while self.twitterThread.isAlive():
 			time.sleep(1)
@@ -85,12 +82,8 @@ class Interface:
 	 input 	: ["word1", "word2", "word3"]
 	 output	: "word1 OR word2 OR word3"
 	'''
-	def get_query(self, wordlist):
-		query = ""
-		for word in wordlist:
-			query += " OR " + word
-		query = query[4:]
-		return query
+	def get_query(self, words):
+		return ' OR '.join(words)
 		
 	'''
 	Main method for testing
@@ -98,7 +91,7 @@ class Interface:
 	def main(self):
 		query =	self.get_query(words)
 
-		self.search(query)
+		self.search(query, args)
 		self.score()
 
 		self.db.close()

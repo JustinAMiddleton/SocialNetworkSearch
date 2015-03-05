@@ -13,12 +13,13 @@ directly.
 
 class TwitterSearch(object):	
 
-	def __init__(self, api, query, db, scorer):
+	def __init__(self, api, db, scorer, query, args):
 		self.tweetCount = 0
 		self.api = api
-		self.query = query
 		self.db = db
 		self.scorer = scorer
+		self.query = query
+		self.args = args
 		
 	'''
 	Halt operations until api limit has been reset
@@ -44,6 +45,7 @@ class TwitterSearch(object):
 					'count' : 100,
 					'lang' : 'en',
 					'result_type' : 'recent',
+					'geocode' : self.args['location']
 					}
 					
 		if starting_id:
@@ -86,11 +88,6 @@ class TwitterSearch(object):
 	def create_Tweet_object(self, search_result):
 		media_urls = None
 		geocode = None
-		
-		'''if MEDIA_URLS_ENABLED:
-			media_urls = self.lookup_media_urls(search_result)
-		if GEOCODES_ENABLED:
-			geocode = self.lookup_geocode(search_result, geocoder)'''
 			
 		tweet = Tweet(search_result, media_urls, geocode)
 		return tweet
