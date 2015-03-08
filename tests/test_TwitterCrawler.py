@@ -1,6 +1,6 @@
 import unittest
 import twitter
-from SocialNetworkSearch.TwitterDemo.TwitterCrawler import TwitterCrawler
+from SocialNetworkSearch.TwitterCrawler import TwitterCrawler
 
 class test_TwitterCrawler(unittest.TestCase):
 

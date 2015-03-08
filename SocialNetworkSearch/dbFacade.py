@@ -147,14 +147,18 @@ class dbFacade(object):
 			);
 			""" % self.keyspace)
 
-	def clearDatabase(self):
-		keyspaces = self.getKeyspaceNames()
+	def delete_keyspace(self):
+		self.session.execute("""
+			DROP KEYSPACE %s; """ % self.keyspace)
+
+	def clear_database(self):
+		keyspaces = self.get_keyspace_names()
 		
 		for keyspace in keyspaces:
 			if "search" in keyspace:
 				self.session.execute("""DROP KEYSPACE %s;""" % keyspace)
 					
-	def getKeyspaceNames(self):
+	def get_keyspace_names(self):
 		keys = self.session.execute("""
 			SELECT * FROM system.schema_keyspaces;"""); 
 			

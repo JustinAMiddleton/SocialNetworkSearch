@@ -1,4 +1,4 @@
-from TwitterDemo.TwitterCrawler import TwitterCrawler
+from TwitterCrawler import TwitterCrawler
 from TwitterThread import TwitterThread
 from dbFacade import dbFacade
 from Scorer import Scorer

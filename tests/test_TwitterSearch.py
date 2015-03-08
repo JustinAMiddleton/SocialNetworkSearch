@@ -1,8 +1,8 @@
 import unittest
 import twitter
-from SocialNetworkSearch.TwitterDemo.TwitterSearch import TwitterSearch
-from SocialNetworkSearch.TwitterDemo.TwitterCrawler import TwitterCrawler
-from SocialNetworkSearch.TwitterDemo.Tweet import Tweet
+from SocialNetworkSearch.TwitterSearch import TwitterSearch
+from SocialNetworkSearch.TwitterCrawler import TwitterCrawler
+from SocialNetworkSearch.Tweet import Tweet
 from SocialNetworkSearch.dbFacade import dbFacade
 from SocialNetworkSearch.Scorer import Scorer
 
