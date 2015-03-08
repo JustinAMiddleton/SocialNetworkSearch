@@ -7,56 +7,22 @@ This includes removing 'original messages' and tags
 that are in the header of each email file.
 """
 
+
 def format_email(email):
 	email = remove_tags(email)
 	email = remove_forwards(email)
 	email = remove_replies(email)
 	return email
 
+
 def remove_tags(email):
-	"""@ GITHUB -> inkhorn / enron processing.py """
-	# remove headers
-	email = email[email.find("\n\n"):]
+	# each email header ends with this tag
+	xfile_name_pat = re.compile("X-FileName:.*\n")
 
-	# regular expression declaration
-	email_pat = re.compile(".+@.+")
-	to_pat = re.compile("To:.+\n")
-	cc_pat = re.compile("cc:.+\n")
-	subject_pat = re.compile("Subject:.+\n")
-	from_pat = re.compile("From:.+\n")
-	sent_pat = re.compile("Sent:.+\n")
-	received_pat = re.compile("Received:.+\n")
-	ctype_pat = re.compile("Content-Type:.+\n")
-	reply_pat = re.compile("Reply- Organization:.+\n")
-	date_pat = re.compile("Date:.+\n")
-	xmail_pat = re.compile("X-Mailer:.+\n")
-	mimver_pat = re.compile("MIME-Version:.+\n")
-	contentinfo_pat = re.compile("----------------------------------------.+----------------------------------------")
-	forwardedby_pat = re.compile(".+------------.+\n")
-	caution_pat = re.compile('''\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*.+\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*''')
-	privacy_pat = re.compile(" _______________________________________________________________.+ _______________________________________________________________")
+	# split at final tag
+	email = re.split(xfile_name_pat, email, 1)
 
-	# regular expression cleanup
-	email = to_pat.sub('', email)
-	email = cc_pat.sub('', email)
-	email = subject_pat.sub('', email)
-	email = from_pat.sub('', email)
-	email = sent_pat.sub('', email)
-	email = email_pat.sub('', email)
-	email = ctype_pat.sub('', email)
-	email = reply_pat.sub('', email)
-	email = date_pat.sub('', email)
-	email = xmail_pat.sub('', email)
-	email = mimver_pat.sub('', email)
-	email = contentinfo_pat.sub('', email)
-	email = forwardedby_pat.sub('', email)
-	email = caution_pat.sub('', email)
-	email = privacy_pat.sub('', email)
-	email = email.replace("-----Original Message-----", "")
-
-	# remove some excessive whitespace
-	email = email.replace('\n', ' ')
-	email = email.replace('  ', ' ')
+	email = email[len(email) - 1]
 
 	return email
 
@@ -66,12 +32,47 @@ def remove_forwards(email):
 	Purpose of this method is to remove forwarded emails from
 	the email file sent in.
 	"""
+	forward_pattern = re.compile("---------------------- Forwarded by.+---------------------------", re.DOTALL)
+	forward_patterns = [forward_pattern]
+
+	# use below to add when other formats are found
+	# forward_pattern = re.compile("this")
+	# forward_patterns.append(forward_pattern)
+
+	for forward_pat in forward_patterns:
+		email = re.split(forward_pat, email, 1)[0]
+
 	return email
 
 
 def remove_replies(email):
 	"""
 	Removes the emails that are listed below what the user actually
-	sent (i.e. messages they've replied to).
+	sent (i.e. messages they've replied to or the 'Original Message').
 	"""
+	# string formats
+
+	s_replies_formats = ['-----Original Message-----']
+
+	# s_replies_formats.append('new format')
+
+	for reply_format in s_replies_formats:
+		email = email.split(reply_format, 1)[0]
+
+	# regular expressions formats
+
+	# this pattern is modeled after those like seen in 'arnold-j/sent/17 and 10'
+	# Note the range limits to capture the right part of the email and not let it span outside
+	reply_pattern = re.compile("\n.{1,30}@.{1,30}\n{1,2}.{1,3}/.{1,3}/.{1,20}\n{1,2}To:.*\ncc:.*\nSubject:")
+	re_replies_formats = [reply_pattern]
+
+	# modeled after 'arnold-j/sent/3'
+	reply_pattern = re.compile("\n.{1,30}@.{1,30}/.{1,3}/.{1,20}\nTo:.*\ncc:.*\nSubject:")
+	re_replies_formats.append(reply_pattern)
+
+
+
+	for reply_pat in re_replies_formats:
+		email = re.split(reply_pat, email, 1)[0]
+
 	return email
