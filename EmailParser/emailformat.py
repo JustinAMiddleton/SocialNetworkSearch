@@ -22,6 +22,7 @@ def remove_tags(email):
 	# split at final tag
 	email = re.split(xfile_name_pat, email, 1)
 
+	# made this safe in case there was no split
 	email = email[len(email) - 1]
 
 	return email
@@ -61,16 +62,22 @@ def remove_replies(email):
 
 	# regular expressions formats
 
-	# this pattern is modeled after those like seen in 'arnold-j/sent/17 and 10'
+	# this pattern is modeled after those like seen in 'arnold-j/sent/17 and 10' aka internal
 	# Note the range limits to capture the right part of the email and not let it span outside
-	reply_pattern = re.compile("\n.{1,30}@.{1,30}\n{1,2}.{1,3}/.{1,3}/.{1,20}\n{1,2}To:.*\ncc:.*\nSubject:")
+	reply_pattern = re.compile("\n.{1,30}@.{1,30}\n{1,2}.{1,5}/.{1,2}/.{1,20}\n{1,2}.{1,10}To:.*\n.{0,10}cc:.*\n.{0,10}Subject:")
 	re_replies_formats = [reply_pattern]
 
-	# modeled after 'arnold-j/sent/3'
+	# modeled after 'arnold-j/sent/3' aka external
 	reply_pattern = re.compile("\n.{1,30}@.{1,30}/.{1,3}/.{1,20}\nTo:.*\ncc:.*\nSubject:")
 	re_replies_formats.append(reply_pattern)
 
+	# modeled after 'arora-h/sent/6 aka 'From:' style
+	reply_pattern = re.compile("\nFrom:.{1,30}@.{1,40}/.{1,2}/.{1,20}To:.*cc:.*Subject:", re.DOTALL)
+	re_replies_formats.append(reply_pattern)
 
+	# modeled after 'bass-e/sent/10 aka 'To:' style
+	reply_pattern = re.compile("\nTo:.*cc:.*Subject:", re.DOTALL)
+	re_replies_formats.append(reply_pattern)
 
 	for reply_pat in re_replies_formats:
 		email = re.split(reply_pat, email, 1)[0]
