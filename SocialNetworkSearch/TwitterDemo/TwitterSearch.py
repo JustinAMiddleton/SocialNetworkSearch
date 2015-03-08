@@ -1,6 +1,8 @@
 import time
 import twitter
 from Tweet import Tweet
+from SocialNetworkSearch.dbFacade import dbFacade
+from SocialNetworkSearch.Scorer import Scorer
 
 '''
 This class defines Twitter api searching functionality.
@@ -13,7 +15,20 @@ directly.
 
 class TwitterSearch(object):	
 
-	def __init__(self, api, db, scorer, query, args):
+	def __init__(self, api=None, db=None, scorer=None, query=None, args=None):
+		if not isinstance(api, twitter.Api):
+			raise TypeError('Twitter API instance required')
+		elif not isinstance(db, dbFacade):
+			raise TypeError('dbFacade instance required')
+		elif not isinstance(scorer, Scorer):
+			raise TypeError('Scorer instance required')
+		elif not isinstance(query, str):
+			raise TypeError('Query must be a string')
+		elif not isinstance(args, dict):
+			raise TypeError('Args must be a dictionary')
+		elif not 'location' in args.keys():
+			raise KeyError('Location not defined in args')
+
 		self.tweetCount = 0
 		self.api = api
 		self.db = db
@@ -49,6 +64,8 @@ class TwitterSearch(object):
 					}
 					
 		if starting_id:
+			if not isinstance(starting_id, int):
+				raise TypeError('Starting ID must be an integet')
 			params['max_id'] = starting_id
 			
 		results = self.api.GetSearch(**params)
@@ -58,7 +75,12 @@ class TwitterSearch(object):
 	Takes in a list of Tweet objects and inserts them
 	as entries in the database
 	'''
-	def store_tweets_in_database(self, tweets):
+	def store_tweets_in_database(self, tweets=None):
+		if tweets is None:
+			raise TypeError('Tweets argument required')
+		elif not isinstance(tweets, list):
+			raise TypeError('Tweets argument must be a list of Tweets')
+
 		for tweet in tweets:
 			username = tweet.api_tweet_data.user.screen_name.encode('utf-8')
 			post_text = tweet.api_tweet_data.text.encode('utf-8').replace("'", "''")
@@ -78,7 +100,12 @@ class TwitterSearch(object):
 	Takes in a list of search results in the Twitter API response
 	format and converts them to Tweet objects
 	'''
-	def create_Tweet_objects(self, search_results):
+	def create_Tweet_objects(self, search_results=None):
+		if search_results is None:
+			raise TypeError('Search results argument required')
+		elif not isinstance(search_results, list):
+			raise TypeError('Search results argument must be a list of Tweets')
+
 		tweets = []
 		for search_result in search_results:
 			tweet = self.create_Tweet_object(search_result)
