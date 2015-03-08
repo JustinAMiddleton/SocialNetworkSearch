@@ -15,12 +15,12 @@ import sys
 import Queue
 
 class GuiThread(threading.Thread):
-	def __init__(self, words, weights, sentiments):
+	def __init__(self, words, weights, sentiments, args):
 		threading.Thread.__init__(self)
 		self.words = words
 		self.weights = weights
 		self.sentiments = sentiments
-		self.args = {'location' : None}
+		self.args = args
 	def run(self):
 		zip(self.words,self.weights,self.sentiments)
 		self.interface = Interface(self.words, self.weights, self.sentiments)
@@ -76,7 +76,12 @@ class App():
 		self.create_main_window_controls()
 
 	def search(self):
-		self.thread = GuiThread(self.words, self.weights, self.sentiments)
+		args = {}
+
+		if self.location.get() is not None:
+			args['location'] = self.location.get()
+
+		self.thread = GuiThread(self.words, self.weights, self.sentiments, args)
 		self.thread.start()
 
 	def stop(self):
@@ -86,6 +91,10 @@ class App():
 		Label(self.frame, text="Attribute").grid(row=0, column=0, sticky=E)
 		Button(self.frame, text=self.defAtt, 
 			command=self.create_attribute_window).grid(row=0, column=1,sticky=W+N)
+
+		Label(self.frame, text="Location").grid(row=1, column=0)
+		self.location = Entry(self.frame, width=15)
+		self.location.grid(row=1, column=1)
 
 		Button(self.frame, text="Search", 
 			command=self.search).grid(row=4, column=0, 
@@ -141,6 +150,7 @@ class App():
 		set_attribute = lambda: self.set_attribute_values(wordBoxes, weights, sentiments)
 
 		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=4, column=0,pady=10, padx=5)
+	
 
 	def get_control_values(self, controls):
 		values = []
