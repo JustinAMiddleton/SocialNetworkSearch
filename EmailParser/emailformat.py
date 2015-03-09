@@ -50,6 +50,7 @@ def remove_replies(email):
 	"""
 	Removes the emails that are listed below what the user actually
 	sent (i.e. messages they've replied to or the 'Original Message').
+	Note: remove tags should be used first or this may misbehave
 	"""
 	# string formats
 
@@ -72,7 +73,10 @@ def remove_replies(email):
 	re_replies_formats.append(reply_pattern)
 
 	# modeled after 'arora-h/sent/6 aka 'From:' style
-	reply_pattern = re.compile("\nFrom:.{1,30}@.{1,40}/.{1,2}/.{1,20}To:.*cc:.*Subject:", re.DOTALL)
+	# reply_pattern = re.compile("\nFrom:.{1,30}@.{1,40}/.{1,2}/.{1,20}To:.*cc:.*Subject:", re.DOTALL)
+	# re_replies_formats.append(reply_pattern)
+
+	reply_pattern = re.compile("\n.{0,4}From:.{1,70}/.{1,2}/.{1,20}To:.*cc:.*Subject:", re.DOTALL)
 	re_replies_formats.append(reply_pattern)
 
 	# modeled after 'bass-e/sent/10 aka 'To:' style
