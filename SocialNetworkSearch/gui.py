@@ -59,10 +59,10 @@ class App():
 	attribute1 = "Attribute 1"
 	defAtt = "Define Attribute"
 
-	attribute1_values = [["","High","Positive"],
-				["","High","Positive"],
-				["","High","Positive"],
-				["","High","Positive"]]
+	attribute1_values = [["",3,1],
+						["",3,1],
+						["",3,1],
+						["",3,1]]
 	words = []
 	weights = []
 	sentiments = []
@@ -134,14 +134,25 @@ class App():
 			var1 = StringVar(toplevel)
 			var1.set("Weight")
 			if (self.attribute1_values[i][1] != ""):
-				var1.set(self.attribute1_values[i][1])
+				if self.attribute1_values[i][1] == 3:
+					var1.set("High")
+				elif self.attribute1_values[i][1] == 2:
+					var1.set("Medium")
+				else:
+					var1.set("Low")
+			#var1.set(self.attribute1_values[i][1])
 			weight = OptionMenu(self.attribute_frame, var1, "High", "Medium", "Low")
 			weight.config(width=7)
 			weight.grid(row=i, column=2)
 			weights.append(var1)
 			
 			sentimentStr = StringVar(toplevel)
-			sentimentStr.set(self.attribute1_values[i][2])
+			if (self.attribute1_values[i][2] != ""):
+				if self.attribute1_values[i][2] == 1:
+					sentimentStr.set("Positive")
+				else:
+					sentimentStr.set("Negative")
+
 			sentiment = OptionMenu(self.attribute_frame, sentimentStr, "Positive", "Negative")
 			sentiment.config(width=7)
 			sentiment.grid(row=i, column=3)
