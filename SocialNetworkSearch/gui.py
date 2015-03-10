@@ -63,6 +63,7 @@ class Attribute():
 class GuiThread(threading.Thread):
 	def __init__(self, attributes, args):
 		threading.Thread.__init__(self)
+		self.interface = None
 		self.words = attributes[0].words
 		self.weights = attributes[0].weights
 		self.sentiments = attributes[0].sentiments
@@ -129,12 +130,17 @@ class App():
 
 		self.thread = GuiThread(self.attributes, args)
 		self.thread.start()
+		
+		while self.thread.interface == None:
+			time.sleep(1)
 
 		self.stop_button.config(state = NORMAL)
 
 	def stop(self):
 		self.stop_button.config(state = DISABLED)
-		self.thread.stop()
+
+		if self.thread.isAlive():
+			self.thread.stop()
 
 		self.start_button.config(state = NORMAL)
 		
