@@ -125,11 +125,19 @@ class App():
 		if self.location.get() is not None:
 			args['location'] = self.location.get()
 
+		self.start_button.config(state = DISABLED)
+
 		self.thread = GuiThread(self.attributes, args)
 		self.thread.start()
 
+		self.stop_button.config(state = NORMAL)
+
 	def stop(self):
+		self.stop_button.config(state = DISABLED)
 		self.thread.stop()
+
+		self.start_button.config(state = NORMAL)
+		
 
 	def define_attribute(self, attribute):
 		self.toplevel= Toplevel()
@@ -205,7 +213,7 @@ class App():
 		output_frame = Frame(toplevel)
 		output_frame.pack()
 
-		self.widget = ThreadSafeConsole(output_frame, height=30, width=50)
+		self.widget = ThreadSafeConsole(output_frame, height=5, width=50)
 		self.widget.grid(column=0, row=5, columnspan=2)
 		sys.stdout = self.widget
 
@@ -274,10 +282,14 @@ class App():
 		buttons = Frame(self.frame)
 		buttons.grid(row=8, column=0, rowspan=2, columnspan=4, pady=10)
 
-		Button(buttons, text="Search", command=self.search,
-				font = "Verdana 10").grid(row=8)
-		Button(buttons, text="Stop", command=self.stop,
-			 	font = "Verdana 10").grid(row=9, pady=5)
+		self.start_button = Button(buttons, text="Search", 
+				command=self.search, font = "Verdana 10")
+		self.start_button.grid(row=8)
+		
+		self.stop_button = Button(buttons, text="Stop", 
+				command=self.stop, font = "Verdana 10")
+		self.stop_button.grid(row=9, pady=5)
+		self.stop_button.config(state = DISABLED)
 
 
 root=Tk()
