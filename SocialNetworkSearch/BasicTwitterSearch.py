@@ -50,7 +50,7 @@ class BasicSearch(TwitterSearch):
 			lowest_id = results[99].GetId()
 			
 			try:
-				results = super(BasicSearch, self).get_100_search_results(lowest_id)
+				results = super(BasicSearch, self).get_100_search_results((int)(lowest_id))
 				tweets = super(BasicSearch, self).create_Tweet_objects(results)
 				super(BasicSearch, self).store_tweets_in_database(tweets)
 			except twitter.TwitterError as e:

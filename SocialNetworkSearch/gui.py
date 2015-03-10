@@ -14,12 +14,58 @@ import thread
 import sys
 import Queue
 
-class GuiThread(threading.Thread):
-	def __init__(self, words, weights, sentiments, args):
-		threading.Thread.__init__(self)
+class Attribute():
+	words = None
+	weights = None
+	sentiments = None
+
+	def set_words(self, words):
 		self.words = words
-		self.weights = weights
-		self.sentiments = sentiments
+
+	def set_weights(self, weights):
+		newWeights = []
+		for weight in weights:
+			if weight == "High":
+				newWeights.append(3)
+			elif weight == "Medium":
+				newWeights.append(2)
+			else:
+				newWeights.append(1)
+		self.weights = newWeights
+
+	def set_sentiments(self, sentiments):
+		newSentiments = []
+		for sentiment in sentiments:
+			if sentiment == "Positive":
+				newSentiments.append(1)
+			else:
+				newSentiments.append(-1)
+		self.sentiments = newSentiments
+
+	def get_word(self, index):
+		return self.words[index]
+
+	def get_weight(self, index):
+		if self.weights[index] == 3:
+			return "High"
+		elif self.weights[index] == 2:
+			return "Medium"
+		else:
+			return "Low"
+
+	def get_sentiment(self, index):
+		if self.sentiments[index] == 1:
+			return "Positive"
+		else:
+			return "Negative"
+
+
+class GuiThread(threading.Thread):
+	def __init__(self, attributes, args):
+		threading.Thread.__init__(self)
+		self.words = attributes[0].words
+		self.weights = attributes[0].weights
+		self.sentiments = attributes[0].sentiments
 		self.args = args
 	def run(self):
 		zip(self.words,self.weights,self.sentiments)
@@ -56,24 +102,22 @@ class ThreadSafeConsole(Text):
         self.after(100, self.update_me)
 
 class App():
-	attribute1 = "Attribute 1"
-	defAtt = "Define Attribute"
-
-	attribute1_values = [["",3,1],
-						["",3,1],
-						["",3,1],
-						["",3,1]]
-	words = []
-	weights = []
-	sentiments = []
+	attributes = []
 	
 	def __init__(self, master): 
 		self.frame = Frame(master)
 		self.frame.pack()
+		self.frame.grid(pady=15, padx=15)
 		master.title("Whistleblower Analysis")
+		master.geometry('460x310-625+200')
 
-		self.create_output_window()
+		self.initialize_attributes()
 		self.create_main_window_controls()
+	
+
+	def initialize_attributes(self):
+		for i in range(0, 4): 
+			self.attributes.append(Attribute())
 
 	def search(self):
 		args = {}
@@ -81,27 +125,78 @@ class App():
 		if self.location.get() is not None:
 			args['location'] = self.location.get()
 
-		self.thread = GuiThread(self.words, self.weights, self.sentiments, args)
+		self.thread = GuiThread(self.attributes, args)
 		self.thread.start()
 
 	def stop(self):
-		self.thread.stop()		
+		self.thread.stop()
 
-	def create_main_window_controls(self):
-		Label(self.frame, text="Attribute").grid(row=0, column=0, sticky=E)
-		Button(self.frame, text=self.defAtt, 
-			command=self.create_attribute_window).grid(row=0, column=1,sticky=W+N)
+	def define_attribute(self, attribute):
+		self.toplevel= Toplevel()
+		self.toplevel.title('Define Attribute')
+		self.toplevel.focus_set()
+		self.toplevel.geometry('450x180-160+200')
+		self.attribute_frame = Frame(self.toplevel)
+		self.attribute_frame.pack()
 
-		Label(self.frame, text="Location").grid(row=1, column=0)
-		self.location = Entry(self.frame, width=15)
-		self.location.grid(row=1, column=1)
+		values = self.create_attribute_controls(attribute)
 
-		Button(self.frame, text="Search", 
-			command=self.search).grid(row=4, column=0, 
-						columnspan=2, sticky=W+E+S, pady=30)
-		Button(self.frame, text="Stop", 
-			command=self.stop).grid(row=4, column=0,
-						columnspan=2, sticky=W+E+S)
+		set_attribute = lambda: self.set_attribute_values(attribute, values)
+
+		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=4, column=0,pady=10, padx=5)
+
+	def clear_attribute(self, index):
+		self.attributes[index] = Attribute()
+
+	def create_attribute_controls(self, attribute):	
+		wordBoxes = []
+		weightBoxes = []
+		sentimentBoxes = []
+
+		new_attribute = True
+		if attribute.words is not None:
+			new_attribute = False
+
+		for i in range(0,4):
+			Label(self.attribute_frame, text="Word "+str(i+1)).grid(row=i, column=0)
+			wordBox = Entry(self.attribute_frame)
+			wordBox.grid(row=i, column=1)
+
+			weightStr = StringVar(self.toplevel)
+			sentimentStr = StringVar(self.toplevel)
+	
+			weightBox = OptionMenu(self.attribute_frame, weightStr, "High", "Medium", "Low")
+			sentimentBox = OptionMenu(self.attribute_frame, sentimentStr, "Positive", "Negative")
+
+			weightBox.config(width=7)
+			sentimentBox.config(width=7)
+			weightBox.grid(row=i, column=2)
+			sentimentBox.grid(row=i, column=3)
+
+			if new_attribute:
+				weightStr.set("Weight")
+				sentimentStr.set("Positive")
+			else:
+				wordBox.insert(0, attribute.get_word(i))
+				weightStr.set(attribute.get_weight(i))
+				sentimentStr.set(attribute.get_sentiment(i))
+
+			wordBoxes.append(wordBox)
+			weightBoxes.append(weightStr)
+			sentimentBoxes.append(sentimentStr)
+
+		return [wordBoxes, weightBoxes, sentimentBoxes]
+	
+	def set_attribute_values(self, attribute, values):
+		words = self.get_control_values(values[0])
+		weights = self.get_control_values(values[1])
+		sentiments = self.get_control_values(values[2])
+	
+		for word in words:
+			attribute.set_words(words)
+			attribute.set_weights(weights)
+			attribute.set_sentiments(sentiments)
+
 
 	def create_output_window(self):
 		toplevel= Toplevel()
@@ -114,55 +209,6 @@ class App():
 		self.widget.grid(column=0, row=5, columnspan=2)
 		sys.stdout = self.widget
 
-	def create_attribute_window(self): 
-		toplevel= Toplevel()
-		toplevel.title('Define Attribute')
-		toplevel.focus_set()
-		self.attribute_frame = Frame(toplevel)
-		self.attribute_frame.pack()
-
-		wordBoxes = []
-		weights = []
-		sentiments = []
-		for i in range(0,4):
-			Label(self.attribute_frame, text="Word "+str(i+1)).grid(row=i, column=0)
-			wordBox = Entry(self.attribute_frame)
-			wordBox.insert(0, self.attribute1_values[i][0])
-			wordBox.grid(row=i, column=1)
-			wordBoxes.append(wordBox)
-			
-			var1 = StringVar(toplevel)
-			var1.set("Weight")
-			if (self.attribute1_values[i][1] != ""):
-				if self.attribute1_values[i][1] == 3:
-					var1.set("High")
-				elif self.attribute1_values[i][1] == 2:
-					var1.set("Medium")
-				else:
-					var1.set("Low")
-			#var1.set(self.attribute1_values[i][1])
-			weight = OptionMenu(self.attribute_frame, var1, "High", "Medium", "Low")
-			weight.config(width=7)
-			weight.grid(row=i, column=2)
-			weights.append(var1)
-			
-			sentimentStr = StringVar(toplevel)
-			if (self.attribute1_values[i][2] != ""):
-				if self.attribute1_values[i][2] == 1:
-					sentimentStr.set("Positive")
-				else:
-					sentimentStr.set("Negative")
-
-			sentiment = OptionMenu(self.attribute_frame, sentimentStr, "Positive", "Negative")
-			sentiment.config(width=7)
-			sentiment.grid(row=i, column=3)
-			sentiments.append(sentimentStr)
-
-		set_attribute = lambda: self.set_attribute_values(wordBoxes, weights, sentiments)
-
-		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=4, column=0,pady=10, padx=5)
-	
-
 	def get_control_values(self, controls):
 		values = []
 		for control in controls:
@@ -170,28 +216,68 @@ class App():
 			values.append(value)
 		return values
 
-	def set_attribute_values(self, words, weights, sentiments):
-		self.words = self.get_control_values(words)
-		
-		newWeights = []
-		for weight in weights:
-			if weight.get()== "High":
-				newWeights.append(3)
-			elif weight.get() == "Medium":
-				newWeights.append(2)
-			else:
-				newWeights.append(1)
+	def create_main_window_controls(self):
+		'''
+		Attributes
+		'''
+		self.defAtt = "Define Attribute"
+		attributes = Frame(self.frame)
+		attributes.grid(row=0, column=0, rowspan=3, columnspan=3, padx=10, sticky=N)
 
-		newSentiments = []
-		for sentiment in sentiments:
-			if sentiment.get() == "Positive":
-				newSentiments.append(1)
-			else:
-				newSentiments.append(-1)
+		Label(attributes, text="Attributes", font = "Verdana 10 bold").grid(row=0, column=0, pady=4)
 
-		self.weights = newWeights
-		self.sentiments = newSentiments
-		self.attribute1_values = zip(self.words,self.weights,self.sentiments)
+		Label(attributes, text="Attribute 1").grid(row=1, column=0)
+		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[0])).grid(
+				    row=1, column=1, pady=4)
+		Button(attributes, text="X", command=lambda: self.clear_attribute(0)).grid(row=1, column=2, padx=5)
+
+		Label(attributes, text="Attribute 2").grid(row=2, column=0)
+		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[1])).grid(
+				    row=2, column=1, pady=4)
+		Button(attributes, text="X", command=lambda: self.clear_attribute(1)).grid(row=2, column=2, padx=5)
+
+		Label(attributes, text="Attribute 3").grid(row=3, column=0)
+		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[2])).grid(
+				    row=3, column=1, pady=4)
+		Button(attributes, text="X", command=lambda: self.clear_attribute(2)).grid(row=3, column=2, padx=5)
+
+		''' 
+		Options
+		'''
+		options = Frame(self.frame)
+		options.grid(row=1, column=3, rowspan=7, columnspan=1, padx=10, sticky=S)
+
+		Label(options, text="Options", font = "Verdana 10 bold").grid(row=0, pady=5, sticky=W)
+		Label(options, text="Web Sites").grid(row=1, pady=5, sticky=W)
+		var1 = IntVar()
+		Checkbutton(options, text="Twitter", variable=var1).grid(row=2,
+				    sticky=W, padx=15)
+		var2 = IntVar()
+		googleCheck = Checkbutton(options, text="Google+", variable=var2)
+		googleCheck.config(state = DISABLED)
+		googleCheck.grid(row=3, sticky=W, padx=15)
+
+		Label(options, text="Location").grid(row=4, sticky=W, pady=5, padx=5)
+		self.location = Entry(options, width=15)
+		self.location.grid(row=5, padx=15)
+
+		var=StringVar(options)
+		var.set("Select Date")
+		datePicker = OptionMenu(options, var, "Last 30 Days",
+				    "Last 90 Days", "Past Year")
+		datePicker.grid(row=6, pady=10, padx=5, sticky=W)
+		datePicker.config(state = DISABLED)
+
+		'''
+		Start/Stop Command Buttons
+		'''
+		buttons = Frame(self.frame)
+		buttons.grid(row=8, column=0, rowspan=2, columnspan=4, pady=10)
+
+		Button(buttons, text="Search", command=self.search,
+				font = "Verdana 10").grid(row=8)
+		Button(buttons, text="Stop", command=self.stop,
+			 	font = "Verdana 10").grid(row=9, pady=5)
 
 
 root=Tk()

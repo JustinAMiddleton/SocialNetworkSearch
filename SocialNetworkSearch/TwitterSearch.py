@@ -65,7 +65,7 @@ class TwitterSearch(object):
 					}
 					
 		if starting_id:
-			if not isinstance(starting_id, long):
+			if not isinstance(starting_id, int):
 				raise TypeError('Starting ID must be an "long" variable')
 			params['max_id'] = starting_id
 			
