@@ -149,6 +149,10 @@ class App():
 
 		self.start_button.config(state = NORMAL)
 
+	def create_main_window_controls(self):
+		self.create_main_window_attribute_controls()
+		self.create_main_window_options_controls()
+		self.create_main_window_command_controls()
 	
 	def show_results_window(self):
 		toplevel= Toplevel()
@@ -252,10 +256,7 @@ class App():
 			values.append(value)
 		return values
 
-	def create_main_window_controls(self):
-		'''
-		Attributes
-		'''
+	def create_main_window_attribute_controls(self):
 		self.defAtt = "Define Attribute"
 		attributes = Frame(self.frame)
 		attributes.grid(row=0, column=0, rowspan=3, columnspan=3, padx=10, sticky=N)
@@ -263,30 +264,9 @@ class App():
 		Label(attributes, text="Attributes", font = "Verdana 10 bold").grid(row=0, column=0, pady=4)
 
 		self.create_attribute_label_controls(attributes)
+		self.create_attribute_button_controls(attributes)
 
-		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[0])).grid(
-				    row=1, column=1, pady=4)
-		Button(attributes, text="X", command=lambda: self.clear_attribute(0)).grid(row=1, column=2, padx=5)
-
-		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[1])).grid(
-				    row=2, column=1, pady=4)
-		Button(attributes, text="X", command=lambda: self.clear_attribute(1)).grid(row=2, column=2, padx=5)
-
-		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[2])).grid(
-				    row=3, column=1, pady=4)
-		Button(attributes, text="X", command=lambda: self.clear_attribute(2)).grid(row=3, column=2, padx=5)
-
-		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[3])).grid(
-				    row=4, column=1, pady=4)
-		Button(attributes, text="X", command=lambda: self.clear_attribute(3)).grid(row=4, column=2, padx=5)
-
-		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[4])).grid(
-				    row=5, column=1, pady=4)
-		Button(attributes, text="X", command=lambda: self.clear_attribute(4)).grid(row=5, column=2, padx=5)
-
-		''' 
-		Options
-		'''
+	def create_main_window_options_controls(self):
 		options = Frame(self.frame)
 		options.grid(row=1, column=3, rowspan=7, columnspan=1, padx=10, sticky=S)
 
@@ -310,10 +290,8 @@ class App():
 				    "Last 90 Days", "Past Year")
 		datePicker.grid(row=6, pady=10, padx=5, sticky=W)
 		datePicker.config(state = DISABLED)
-
-		'''
-		Start/Stop Command Buttons
-		'''
+	
+	def create_main_window_command_controls(self):
 		buttons = Frame(self.frame)
 		buttons.grid(row=8, column=0, rowspan=2, columnspan=4, pady=10)
 
@@ -332,6 +310,27 @@ class App():
 			attr_label = Label(frame, text="Attribute "+str(i))
 			attr_label.grid(row=i, column=0)	
 			self.attribute_labels.append(attr_label)
+	
+	def create_attribute_button_controls(self, frame):
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[0])).grid(
+				    row=1, column=1, pady=4)
+		Button(frame, text="X", command=lambda: self.clear_attribute(0)).grid(row=1, column=2, padx=5)
+
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[1])).grid(
+				    row=2, column=1, pady=4)
+		Button(frame, text="X", command=lambda: self.clear_attribute(1)).grid(row=2, column=2, padx=5)
+
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[2])).grid(
+				    row=3, column=1, pady=4)
+		Button(frame, text="X", command=lambda: self.clear_attribute(2)).grid(row=3, column=2, padx=5)
+
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[3])).grid(
+				    row=4, column=1, pady=4)
+		Button(frame, text="X", command=lambda: self.clear_attribute(3)).grid(row=4, column=2, padx=5)
+
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[4])).grid(
+				    row=5, column=1, pady=4)
+		Button(frame, text="X", command=lambda: self.clear_attribute(4)).grid(row=5, column=2, padx=5)
 
 
 root=Tk()
