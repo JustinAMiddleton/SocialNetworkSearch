@@ -33,29 +33,6 @@ class GuiThread(threading.Thread):
 	def stop(self):
 		self.interface.stop_search()
 
-class ThreadSafeConsole(Text):
-    def __init__(self, master, **options):
-        Text.__init__(self, master, **options)
-        self.queue = Queue.Queue()
-        self.update_me()
-    def write(self, line):
-        self.queue.put(line)
-    def clear(self):
-        self.queue.put(None)
-    def update_me(self):
-        try:
-            while 1:
-                line = self.queue.get_nowait()
-                if line is None:
-                    self.delete(1.0, END)
-                else:
-                    self.insert(END, str(line))
-                self.see(END)
-                self.update_idletasks()
-        except Queue.Empty:
-            pass
-        self.after(100, self.update_me)
-
 class App():
 	attributes = []
 	
