@@ -20,8 +20,30 @@ class SearchPacketTests(unittest.TestCase):
     weights = [3]
     sentiments = [1]
     distances = [1]
-    self.packet.add(name, words, weights, sentiments, distances)
+    self.assertEquals(self.packet.add(name, words, weights, sentiments, distances), 1)
     self.assertEquals(len(self.packet.attributes), 1)
+    
+  def test000_001_add_edit(self):    
+    name = "test"
+    words = ["test"]
+    weights1 = [3]
+    weights2 = [2]
+    sentiments = [1]
+    distances = [1]
+    self.assertEquals(self.packet.add(name, words, weights1, sentiments, distances), 1)
+    self.assertEquals(self.packet.add(name, words, weights2, sentiments, distances), 1)
+    self.assertEquals(len(self.packet.attributes), 1)
+    
+  def test000_002_add_moreThanOne(self):
+    name = "test1"
+    name2 = "test2"
+    words = ["test"]
+    weights = [3]
+    sentiments = [1]
+    distances = [1]
+    self.packet.add(name, words, weights, sentiments, distances)
+    self.assertEquals(self.packet.add(name2, words, weights, sentiments, distances), 2)
+    self.assertEquals(len(self.packet.attributes), 2)
     
   #fail
   def test000_900_add_badDimensions(self):
@@ -40,25 +62,57 @@ class SearchPacketTests(unittest.TestCase):
       print str(e)
       self.fail("Error: wrong error.")
       
-  '''def test000_901_add_duplicateAttribute(self):
+  def test000_901_add_emptyName(self):
     correctError = "add: "
     try:
-      name1 = "test"
-      name2 = "test"
-      
+      name = ""
       words = ["test"]
       weights = [3]
       sentiments = [1]
       distances = [1]
-      
-      self.packet.add(name1, words, weights, sentiments, distances)
-      self.packet.add(name2, words, weights, sentiments, distances)
+      self.packet.add(name, words, weights, sentiments, distances)
       self.fail("Error: no error!")
     except ValueError, e:
       self.assertEqual(correctError, str(e)[:len(correctError)])
     except Exception, e:
       print str(e)
-      self.fail("Error: wrong error.")'''
+      self.fail("Error: wrong error.")
+      
+  def test000_902_add_emptyWord(self):
+    correctError = "add: "
+    try:
+      name = "test"
+      words = ["", ""]
+      weights = [3, 2]
+      sentiments = [1, -1]
+      distances = [1, 1]
+      self.packet.add(name, words, weights, sentiments, distances)
+      self.fail("Error: no error!")
+    except ValueError, e:
+      self.assertEqual(correctError, str(e)[:len(correctError)])
+    except Exception, e:
+      print str(e)
+      self.fail("Error: wrong error.")
+      
+  '''
+  This test should fail because all values have a problem, which means none will be stored,
+  which means the full attribute itself cannot be constructed.
+  '''
+  def test000_903_add_invalidValues(self):
+    correctError = "add: "
+    try:
+      name = "test"
+      words = ["badWeight", "badSent", "badDistance"]
+      weights = [4, 2, 1]
+      sentiments = [1, 2, -1]
+      distances = [1, 1, -1]
+      self.packet.add(name, words, weights, sentiments, distances)
+      self.fail("Error: no error!")
+    except ValueError, e:
+      self.assertEqual(correctError, str(e)[:len(correctError)])
+    except Exception, e:
+      print str(e)
+      self.fail("Error: wrong error.")
       
 #remove
   #pass
@@ -159,6 +213,42 @@ class SearchPacketTests(unittest.TestCase):
       self.assertEquals(name, names[count])
       count += 1
     self.assertEquals(count, 2)
+    
+#getQuery
+  #pass
+  def test400_000_getQuery(self):
+    name = "test"
+    words = ["one", "two", "three"]
+    weights = [3, 2, 1]
+    sentiments = [1, 1, 1]
+    distances = [1, 1, 1]
+    self.packet.add(name, words, weights, sentiments, distances)
+    
+    name2 = "test2"
+    words2 = ["four", "five"]
+    weights2 = [3, 2]
+    sentiments2 = [-1, -1]
+    distances2 = [1, 1]
+    self.packet.add(name2, words2, weights2, sentiments2, distances2)
+    
+    self.assertEquals(self.packet.getQuery(), "one OR two OR three OR four OR five")
+
+  def test400_001_getQuery_withPhrases(self):
+    name = "test"
+    words = ["zero", "one", "two three"]
+    weights = [3, 2, 1]
+    sentiments = [1, 1, 1]
+    distances = [1, 1, 1]
+    self.packet.add(name, words, weights, sentiments, distances)
+    
+    name2 = "test2"
+    words2 = ["four five", "six"]
+    weights2 = [3, 2]
+    sentiments2 = [-1, -1]
+    distances2 = [1, 1]
+    self.packet.add(name2, words2, weights2, sentiments2, distances2)
+    
+    self.assertEquals(self.packet.getQuery(), "zero OR one OR 'two three' OR 'four five' OR six")        
       
 if __name__ == '__main__':
   unittest.main()  
