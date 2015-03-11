@@ -158,6 +158,14 @@ class App():
 		set_attribute = lambda: self.set_attribute_values(attribute, values)
 
 		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=4, column=0,pady=10, padx=5)
+	
+	def show_results_window(self):
+		toplevel= Toplevel()
+		toplevel.title('Results')
+		toplevel.focus_set()
+		toplevel.geometry('450x400-160+200')
+		output_frame = Frame(toplevel)
+		output_frame.pack()
 
 	def clear_attribute(self, index):
 		self.attributes[index] = Attribute()
@@ -210,7 +218,6 @@ class App():
 			attribute.set_words(words)
 			attribute.set_weights(weights)
 			attribute.set_sentiments(sentiments)
-
 
 	def create_output_window(self):
 		toplevel= Toplevel()
