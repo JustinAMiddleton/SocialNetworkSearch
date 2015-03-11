@@ -169,17 +169,6 @@ class App():
 		attribute.set_weights(weights)
 		attribute.set_sentiments(sentiments)
 
-	def create_output_window(self):
-		toplevel= Toplevel()
-		toplevel.title('Output')
-		toplevel.focus_set()
-		output_frame = Frame(toplevel)
-		output_frame.pack()
-
-		self.widget = ThreadSafeConsole(output_frame, height=5, width=50)
-		self.widget.grid(column=0, row=5, columnspan=2)
-		sys.stdout = self.widget
-
 	def get_control_values(self, controls):
 		values = []
 		for control in controls:
