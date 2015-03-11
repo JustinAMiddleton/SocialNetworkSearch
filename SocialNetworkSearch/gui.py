@@ -15,6 +15,7 @@ import sys
 import Queue
 
 class Attribute():
+	name = "Attribute"
 	words = None
 	weights = None
 	sentiments = None
@@ -146,21 +147,8 @@ class App():
 		self.show_results_window()
 		self.interface.db.close()
 
-		self.start_button.config(state = NORMAL)		
+		self.start_button.config(state = NORMAL)
 
-	def define_attribute(self, attribute):
-		self.toplevel= Toplevel()
-		self.toplevel.title('Define Attribute')
-		self.toplevel.focus_set()
-		self.toplevel.geometry('450x200-160+200')
-		self.attribute_frame = Frame(self.toplevel)
-		self.attribute_frame.pack()
-
-		values = self.create_attribute_controls(attribute)
-
-		set_attribute = lambda: self.set_attribute_values(attribute, values)
-
-		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=5, column=0,pady=10, padx=5)
 	
 	def show_results_window(self):
 		toplevel= Toplevel()
@@ -173,8 +161,21 @@ class App():
 		top_users = self.thread.results
 		for i in range(0,len(top_users)):
 			user = Label(results_frame, text="[%s] %s" % (str(round(top_users[i]['score'],1)), top_users[i]['username']))
-			user.grid(row=i, column=0, sticky=W)
-			
+			user.grid(row=i, column=0, sticky=W)	
+
+	def define_attribute(self, attribute):
+		self.toplevel= Toplevel()
+		self.toplevel.title('Define Attribute')
+		self.toplevel.focus_set()
+		self.toplevel.geometry('450x230-160+200')
+		self.attribute_frame = Frame(self.toplevel)
+		self.attribute_frame.pack()
+
+		values = self.create_attribute_controls(attribute)
+
+		set_attribute = lambda: self.set_attribute_values(attribute, values)
+
+		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=6, column=0,pady=10, padx=5)			
 
 	def clear_attribute(self, index):
 		self.attributes[index] = Attribute()
@@ -188,8 +189,13 @@ class App():
 		if attribute.words is not None:
 			new_attribute = False
 
-		for i in range(0,5):
-			Label(self.attribute_frame, text="Word "+str(i+1)).grid(row=i, column=0)
+		Label(self.attribute_frame, text="Name").grid(row=0, column=0, pady=5)
+		nameBox = Entry(self.attribute_frame)
+		nameBox.grid(row=0, column=1, pady=5)
+		nameBox.insert(0, attribute.name)
+
+		for i in range(1,6):
+			Label(self.attribute_frame, text="Word "+str(i)).grid(row=i, column=0)
 			wordBox = Entry(self.attribute_frame)
 			wordBox.grid(row=i, column=1)
 
@@ -208,21 +214,22 @@ class App():
 				weightStr.set("Weight")
 				sentimentStr.set("Positive")
 			else:
-				wordBox.insert(0, attribute.get_word(i))
-				weightStr.set(attribute.get_weight(i))
-				sentimentStr.set(attribute.get_sentiment(i))
+				wordBox.insert(0, attribute.get_word(i-1))
+				weightStr.set(attribute.get_weight(i-1))
+				sentimentStr.set(attribute.get_sentiment(i-1))
 
 			wordBoxes.append(wordBox)
 			weightBoxes.append(weightStr)
 			sentimentBoxes.append(sentimentStr)
 
-		return [wordBoxes, weightBoxes, sentimentBoxes]
+		return [wordBoxes, weightBoxes, sentimentBoxes, nameBox]
 	
 	def set_attribute_values(self, attribute, values):
 		words = self.get_control_values(values[0])
 		weights = self.get_control_values(values[1])
 		sentiments = self.get_control_values(values[2])
 	
+		attribute.name = values[3].get()
 		attribute.set_words(words)
 		attribute.set_weights(weights)
 		attribute.set_sentiments(sentiments)
@@ -255,27 +262,24 @@ class App():
 
 		Label(attributes, text="Attributes", font = "Verdana 10 bold").grid(row=0, column=0, pady=4)
 
-		Label(attributes, text="Attribute 1").grid(row=1, column=0)
+		self.create_attribute_label_controls(attributes)
+
 		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[0])).grid(
 				    row=1, column=1, pady=4)
 		Button(attributes, text="X", command=lambda: self.clear_attribute(0)).grid(row=1, column=2, padx=5)
 
-		Label(attributes, text="Attribute 2").grid(row=2, column=0)
 		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[1])).grid(
 				    row=2, column=1, pady=4)
 		Button(attributes, text="X", command=lambda: self.clear_attribute(1)).grid(row=2, column=2, padx=5)
 
-		Label(attributes, text="Attribute 3").grid(row=3, column=0)
 		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[2])).grid(
 				    row=3, column=1, pady=4)
 		Button(attributes, text="X", command=lambda: self.clear_attribute(2)).grid(row=3, column=2, padx=5)
 
-		Label(attributes, text="Attribute 4").grid(row=4, column=0)
 		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[3])).grid(
 				    row=4, column=1, pady=4)
 		Button(attributes, text="X", command=lambda: self.clear_attribute(3)).grid(row=4, column=2, padx=5)
 
-		Label(attributes, text="Attribute 5").grid(row=5, column=0)
 		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[4])).grid(
 				    row=5, column=1, pady=4)
 		Button(attributes, text="X", command=lambda: self.clear_attribute(4)).grid(row=5, column=2, padx=5)
@@ -321,6 +325,13 @@ class App():
 				command=self.stop, font = "Verdana 10")
 		self.stop_button.grid(row=9, pady=5)
 		self.stop_button.config(state = DISABLED)
+
+	def create_attribute_label_controls(self, frame):
+		self.attribute_labels = []
+		for i in range(1, len(self.attributes)+1):
+			attr_label = Label(frame, text="Attribute "+str(i))
+			attr_label.grid(row=i, column=0)	
+			self.attribute_labels.append(attr_label)
 
 
 root=Tk()
