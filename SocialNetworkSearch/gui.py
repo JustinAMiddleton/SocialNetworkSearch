@@ -116,7 +116,7 @@ class App():
 	
 
 	def initialize_attributes(self):
-		for i in range(0, 4): 
+		for i in range(0, 5): 
 			self.attributes.append(Attribute())
 
 	def search(self):
@@ -152,7 +152,7 @@ class App():
 		self.toplevel= Toplevel()
 		self.toplevel.title('Define Attribute')
 		self.toplevel.focus_set()
-		self.toplevel.geometry('450x180-160+200')
+		self.toplevel.geometry('450x200-160+200')
 		self.attribute_frame = Frame(self.toplevel)
 		self.attribute_frame.pack()
 
@@ -160,7 +160,7 @@ class App():
 
 		set_attribute = lambda: self.set_attribute_values(attribute, values)
 
-		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=4, column=0,pady=10, padx=5)
+		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=5, column=0,pady=10, padx=5)
 	
 	def show_results_window(self):
 		toplevel= Toplevel()
@@ -188,7 +188,7 @@ class App():
 		if attribute.words is not None:
 			new_attribute = False
 
-		for i in range(0,4):
+		for i in range(0,5):
 			Label(self.attribute_frame, text="Word "+str(i+1)).grid(row=i, column=0)
 			wordBox = Entry(self.attribute_frame)
 			wordBox.grid(row=i, column=1)
@@ -269,6 +269,16 @@ class App():
 		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[2])).grid(
 				    row=3, column=1, pady=4)
 		Button(attributes, text="X", command=lambda: self.clear_attribute(2)).grid(row=3, column=2, padx=5)
+
+		Label(attributes, text="Attribute 4").grid(row=4, column=0)
+		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[3])).grid(
+				    row=4, column=1, pady=4)
+		Button(attributes, text="X", command=lambda: self.clear_attribute(3)).grid(row=4, column=2, padx=5)
+
+		Label(attributes, text="Attribute 5").grid(row=5, column=0)
+		Button(attributes, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[4])).grid(
+				    row=5, column=1, pady=4)
+		Button(attributes, text="X", command=lambda: self.clear_attribute(4)).grid(row=5, column=2, padx=5)
 
 		''' 
 		Options
