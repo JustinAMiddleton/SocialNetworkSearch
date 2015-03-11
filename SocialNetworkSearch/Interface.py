@@ -55,8 +55,7 @@ class Interface:
 	def stop_search(self):
 		print "Closing threads.."
 		self.twitterThread.raiseExc(KeyboardInterrupt)
-			
-
+		
 		while self.twitterThread.isAlive():
 			time.sleep(1)
 		self.twitterThread.join()
@@ -76,6 +75,8 @@ class Interface:
 		users = self.db.get_scored_users()
 		for i in range(0,len(users)):
 			print "[%s] %s" % (str(round(users[i]['score'],1)), users[i]['username'])
+		self.results = users
+		return users
 
 	'''
 	Takes wordlist and forms OR search query string.

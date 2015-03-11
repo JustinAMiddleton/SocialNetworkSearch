@@ -73,8 +73,7 @@ class GuiThread(threading.Thread):
 		self.interface = Interface(self.words, self.weights, self.sentiments)
 		self.query = self.interface.get_query(self.words)
 		self.interface.search(self.query, self.args)
-		self.interface.score()
-		self.interface.db.close()
+		self.results = self.interface.score()
 		time.sleep(1)
 	def stop(self):
 		self.interface.stop_search()
@@ -134,6 +133,7 @@ class App():
 		while self.thread.interface == None:
 			time.sleep(1)
 
+		self.interface = self.thread.interface
 		self.stop_button.config(state = NORMAL)
 
 	def stop(self):
@@ -141,9 +141,12 @@ class App():
 
 		if self.thread.isAlive():
 			self.thread.stop()
+			self.thread.join()
+	
+		self.show_results_window()
+		self.interface.db.close()
 
-		self.start_button.config(state = NORMAL)
-		
+		self.start_button.config(state = NORMAL)		
 
 	def define_attribute(self, attribute):
 		self.toplevel= Toplevel()
@@ -163,9 +166,15 @@ class App():
 		toplevel= Toplevel()
 		toplevel.title('Results')
 		toplevel.focus_set()
-		toplevel.geometry('450x400-160+200')
-		output_frame = Frame(toplevel)
-		output_frame.pack()
+		toplevel.geometry('200x200-160+200')
+		results_frame = Frame(toplevel)
+		results_frame.pack()
+
+		top_users = self.thread.results
+		for i in range(0,len(top_users)):
+			user = Label(results_frame, text="[%s] %s" % (str(round(top_users[i]['score'],1)), top_users[i]['username']))
+			user.grid(row=i, column=0, sticky=W)
+			
 
 	def clear_attribute(self, index):
 		self.attributes[index] = Attribute()
@@ -214,10 +223,9 @@ class App():
 		weights = self.get_control_values(values[1])
 		sentiments = self.get_control_values(values[2])
 	
-		for word in words:
-			attribute.set_words(words)
-			attribute.set_weights(weights)
-			attribute.set_sentiments(sentiments)
+		attribute.set_words(words)
+		attribute.set_weights(weights)
+		attribute.set_sentiments(sentiments)
 
 	def create_output_window(self):
 		toplevel= Toplevel()
