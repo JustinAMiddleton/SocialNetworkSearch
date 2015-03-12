@@ -73,9 +73,10 @@ class Interface:
 
 		# Retrieve and print top 10 scores
 		users = self.db.get_scored_users()
-		for i in range(0,len(users)):
+
+		'''for i in range(0,len(users)):
 			print "[%s] %s" % (str(round(users[i]['score'],1)), users[i]['username'])
-		self.results = users
+		self.results = users'''
 		return users
 
 	'''
