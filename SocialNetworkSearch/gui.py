@@ -9,6 +9,7 @@ Created on Feb 18, 2015
 from Tkinter import *
 from Interface import Interface
 from Attribute import Attribute
+from SearchPacket import SearchPacket
 import time
 import threading
 import thread
@@ -19,14 +20,11 @@ class GuiThread(threading.Thread):
 	def __init__(self, attributes, args):
 		threading.Thread.__init__(self)
 		self.interface = None
-		self.words = attributes[0].words
-		self.weights = attributes[0].weights
-		self.sentiments = attributes[0].sentiments
+		self.search_packet = SearchPacket(attributes)
 		self.args = args
 	def run(self):
-		zip(self.words,self.weights,self.sentiments)
-		self.interface = Interface(self.words, self.weights, self.sentiments)
-		self.query = self.interface.get_query(self.words)
+		self.interface = Interface(self.search_packet)
+		self.query = self.search_packet.getQuery()
 		self.interface.search(self.query, self.args)
 		self.results = self.interface.score()
 		time.sleep(1)

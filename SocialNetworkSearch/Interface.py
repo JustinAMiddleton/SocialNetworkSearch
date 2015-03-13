@@ -2,6 +2,7 @@ from TwitterCrawler import TwitterCrawler
 from TwitterThread import TwitterThread
 from dbFacade import dbFacade
 from Scorer import Scorer
+from SearchPacket import SearchPacket
 from TwitterGeoPics.Geocoder import Geocoder
 import time
 import thread
@@ -31,13 +32,13 @@ class Interface:
 		self.twitterCrawler = TwitterCrawler()
 		self.twitterCrawler.login()'''
 
-	def __init__(self, words, weights, sentiments):
+	def __init__(self, search_packet):
 		self.db = dbFacade()
 		self.db.connect()
 		self.db.create_keyspace_and_schema()
 		self.twitterCrawler = TwitterCrawler()
 		self.twitterCrawler.login()
-		self.scorer = Scorer(zip(words,weights,sentiments))
+		self.scorer = Scorer(search_packet)
 	
 	
 	'''
