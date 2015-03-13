@@ -42,8 +42,8 @@ class TwitterSearch(object):
 	Halt operations until api limit has been reset
 	'''
 	def api_rate_limit_sleep(self):
-		rate_limit_status = self.api.GetRateLimitStatus()
-		reset_time = rate_limit_status['resources']['search']['/search/tweets']['reset']
+		rate_limit_status = self.api.request('application/rate_limit_status')
+		reset_time = rate_limit_status.json()['resources']['search']['/search/tweets']['reset']
 		sleep_time = (int)(reset_time - time.time())
 		print ('\n Twitter rate limit exceeded. Sleeping for {0} seconds..'.format(str(sleep_time)))
 		
@@ -75,8 +75,6 @@ class TwitterSearch(object):
 			if not isinstance(starting_id, int):
 				raise TypeError('Starting ID must be an "long" variable')
 			params['max_id'] = starting_id
-		
-		print params
 	
 		results = self.api.request('search/tweets', params).json()['statuses']		
 	
