@@ -54,12 +54,16 @@ class App():
 	def search(self):
 		args = {}
 
-		if self.location.get() is not None:
+		args['location'] = None
+		args['until'] = None
+		args['since'] = None
+
+		if not self.location.get() == "":
 			args['location'] = self.location.get()
-		if not self.date_until.get() == "yyyy-mm-dd":
+		if not self.date_until.get() in ("","yyyy-mm-dd"):
 			args['until'] = self.date_until.get()
-		if not self.date_since.get() == "yyyy-mm-dd":
-			print self.date_until.get()
+		if not self.date_since.get() in ("","yyyy-mm-dd"):
+			print self.date_since.get()	
 			args['since'] = self.date_since.get()
 
 		self.start_button.config(state = DISABLED)

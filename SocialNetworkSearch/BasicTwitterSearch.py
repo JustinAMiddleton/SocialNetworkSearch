@@ -47,7 +47,7 @@ class BasicSearch(TwitterSearch):
 		
 	def get_next_100_results(self, results):
 		while (len(results) == 100):
-			lowest_id = results[99].GetId()
+			lowest_id = results[99]['id']
 			
 			try:
 				results = super(BasicSearch, self).get_100_search_results((int)(lowest_id))

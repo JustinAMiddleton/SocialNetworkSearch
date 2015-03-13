@@ -5,6 +5,7 @@ from Scorer import Scorer
 from TwitterGeoPics.Geocoder import Geocoder
 import time
 import thread
+import threading
 import cassandra
 
 '''
@@ -54,8 +55,11 @@ class Interface:
 	'''
 	def stop_search(self):
 		print "Closing threads.."
-		self.twitterThread.raiseExc(KeyboardInterrupt)
-		
+		try:		
+			self.twitterThread.raiseExc(KeyboardInterrupt)
+		except threading.ThreadError:
+			pass
+
 		while self.twitterThread.isAlive():
 			time.sleep(1)
 		self.twitterThread.join()
