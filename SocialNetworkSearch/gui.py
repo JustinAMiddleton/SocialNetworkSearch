@@ -39,7 +39,7 @@ class App():
 		self.frame.pack()
 		self.frame.grid(pady=15, padx=15)
 		master.title("Whistleblower Analysis")
-		master.geometry('460x310-625+200')
+		master.geometry('460x370-625+200')
 
 		self.initialize_attributes()
 		self.create_main_window_controls()
@@ -52,8 +52,17 @@ class App():
 	def search(self):
 		args = {}
 
-		if self.location.get() is not None:
+		args['location'] = None
+		args['until'] = None
+		args['since'] = None
+
+		if not self.location.get() == "":
 			args['location'] = self.location.get()
+		if not self.date_until.get() in ("","yyyy-mm-dd"):
+			args['until'] = self.date_until.get()
+		if not self.date_since.get() in ("","yyyy-mm-dd"):
+			print self.date_since.get()	
+			args['since'] = self.date_since.get()
 
 		self.start_button.config(state = DISABLED)
 
@@ -202,16 +211,26 @@ class App():
 		self.location = Entry(options, width=15)
 		self.location.grid(row=5, padx=15)
 
-		var=StringVar(options)
-		var.set("Select Date")
-		datePicker = OptionMenu(options, var, "Last 30 Days",
+		Label(options, text="Since Date").grid(row=6, sticky=W, pady=5, padx=5)
+		self.date_since = Entry(options, width=15)
+		self.date_since.insert(0, "yyyy-mm-dd")
+		self.date_since.grid(row=7, padx=15)
+
+		Label(options, text="Until Date").grid(row=8, sticky=W, pady=5, padx=5)
+		self.date_until = Entry(options, width=15)
+		self.date_until.insert(0, "yyyy-mm-dd")
+		self.date_until.grid(row=9, padx=15)
+
+		'''self.date_until=StringVar(options)
+		self.date_until.set("Select Date")
+		datePicker = OptionMenu(options, self.date_until, "Last 30 Days",
 				    "Last 90 Days", "Past Year")
 		datePicker.grid(row=6, pady=10, padx=5, sticky=W)
-		datePicker.config(state = DISABLED)
+		#datePicker.config(state = DISABLED)'''
 	
 	def create_main_window_command_controls(self):
 		buttons = Frame(self.frame)
-		buttons.grid(row=8, column=0, rowspan=2, columnspan=4, pady=10)
+		buttons.grid(row=8, column=0, rowspan=2, columnspan=4, pady=20)
 
 		self.start_button = Button(buttons, text="Search", 
 				command=self.search, font = "Verdana 10")

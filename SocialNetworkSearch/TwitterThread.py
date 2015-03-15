@@ -1,8 +1,10 @@
 import threading
 import ctypes
 import inspect
-from CrawlThread import CrawlThread
 from TwitterGeoPics.Geocoder import Geocoder
+from CrawlThread import CrawlThread
+from TwitterAPIWrapper import TwitterAPIWrapper
+from BasicTwitterSearch import BasicSearch
 from dbFacade import dbFacade
 from Scorer import Scorer
 
@@ -16,7 +18,7 @@ defines and controls Twitter crawler search threads.
 
 class TwitterThread(CrawlThread):
 
-	def __init__(self, crawler, db, scorer, query, args=None):
+	def __init__(self, db, scorer, query, args=None):
 		if not isinstance(db, dbFacade):
 			raise TypeError('dbFacade instance required')
 		elif not isinstance(scorer, Scorer):
@@ -29,7 +31,8 @@ class TwitterThread(CrawlThread):
 			raise KeyError('Location not defined in args')
 
 		threading.Thread.__init__(self)
-		self.crawler = crawler
+		self.api = TwitterAPIWrapper()
+		self.api.login()
 		self.db = db
 		self.scorer = scorer
 		self.query = query
@@ -38,7 +41,12 @@ class TwitterThread(CrawlThread):
 		if self.args['location']:
 			self.set_location_argument()
 	def run(self):
-		self.crawler.BasicSearch(self.db, self.scorer, self.query, self.args)
+		self.search()
+
+	def search(self):
+		search = BasicSearch(self.api, self.db, self.scorer, self.query, self.args)
+		return search.search()
+		
 
 	def set_location_argument(self):
 		geocoder = Geocoder()

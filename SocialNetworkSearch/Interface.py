@@ -1,4 +1,3 @@
-from TwitterCrawler import TwitterCrawler
 from TwitterThread import TwitterThread
 from dbFacade import dbFacade
 from Scorer import Scorer
@@ -6,7 +5,7 @@ from SearchPacket import SearchPacket
 from TwitterGeoPics.Geocoder import Geocoder
 import time
 import thread
-import cassandra
+import threading
 
 '''
 This class serves as an interface for controlling
@@ -23,29 +22,17 @@ targetSentiment = [1,1,1,1]
 args = { 'location' : None }
 
 class Interface:
-	'''
-	def __init__(self):
-		self.db = dbFacade()
-		self.db.connect()
-		self.db.create_keyspace_and_schema()		
-		self.scorer = Scorer(zip(words, weights, targetSentiment))
-		self.twitterCrawler = TwitterCrawler()
-		self.twitterCrawler.login()'''
-
 	def __init__(self, search_packet):
 		self.db = dbFacade()
 		self.db.connect()
 		self.db.create_keyspace_and_schema()
-		self.twitterCrawler = TwitterCrawler()
-		self.twitterCrawler.login()
 		self.scorer = Scorer(search_packet)
-	
 	
 	'''
 	Starts search crawling threads with inputed query string.
 	'''
 	def search(self, query, args):
-		self.twitterThread = TwitterThread(self.twitterCrawler, self.db, self.scorer, query, args)
+		self.twitterThread = TwitterThread(self.db, self.scorer, query, args)
 		self.twitterThread.start()
 		self.twitterThread.join()
 
@@ -55,8 +42,11 @@ class Interface:
 	'''
 	def stop_search(self):
 		print "Closing threads.."
-		self.twitterThread.raiseExc(KeyboardInterrupt)
-		
+		try:		
+			self.twitterThread.raiseExc(KeyboardInterrupt)
+		except threading.ThreadError:
+			pass
+
 		while self.twitterThread.isAlive():
 			time.sleep(1)
 		self.twitterThread.join()
@@ -69,14 +59,9 @@ class Interface:
 		print "Scoring..\n"
 		users = self.db.get_users_dict()
 		scores = self.db.calculate_user_scores(users)
-		
 		self.db.populate_user_scores(users, scores)
 
-		# Retrieve and print top 10 scores
 		users = self.db.get_scored_users()
-		for i in range(0,len(users)):
-			print "[%s] %s" % (str(round(users[i]['score'],1)), users[i]['username'])
-		self.results = users
 		return users
 
 	'''
@@ -86,18 +71,7 @@ class Interface:
 	'''
 	def get_query(self, words):
 		return ' OR '.join(words)
-		
-	'''
-	Main method for testing
-	'''
-	def main(self):
-		query =	self.get_query(words)
 
-		self.search(query, args)
-		self.score()
-
-		self.db.close()
-		time.sleep(1)
 
 if __name__ == "__main__":
 	Interface().main()

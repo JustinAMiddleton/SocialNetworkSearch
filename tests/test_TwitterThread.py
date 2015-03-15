@@ -1,7 +1,7 @@
 import unittest
 import twitter
 from SocialNetworkSearch.TwitterThread import TwitterThread
-from SocialNetworkSearch.TwitterCrawler import TwitterCrawler
+from SocialNetworkSearch.TwitterAPIWrapper import TwitterAPIWrapper
 from SocialNetworkSearch.Tweet import Tweet
 from SocialNetworkSearch.dbFacade import dbFacade
 from SocialNetworkSearch.Scorer import Scorer
@@ -25,7 +25,6 @@ class test_TwitterThread(unittest.TestCase):
 		self.db = dbFacade()
 		self.db.connect()
 		self.db.create_keyspace_and_schema()
-		self.api = TwitterCrawler().login()
 		self.scorer = Scorer(zip(words, weights, targetSentiment))
 
 	@classmethod
@@ -33,7 +32,7 @@ class test_TwitterThread(unittest.TestCase):
 		self.db.delete_keyspace()
 	
 	def test_create_instance_with_valid_arguments(self):
-		thread = TwitterThread(self.api, self.db, self.scorer, self.query, self.args)
+		thread = TwitterThread(self.db, self.scorer, self.query, self.args)
 		self.assertIsInstance(thread, TwitterThread)
 
 	def test_create_instance_without_required_arguments(self):	
@@ -45,35 +44,35 @@ class test_TwitterThread(unittest.TestCase):
 
 	def test_create_instance_with_invalid_db_argument(self):
 		try:
-			thread = TwitterThread(self.api, None, self.scorer, self.query, self.args)
+			thread = TwitterThread(None, self.scorer, self.query, self.args)
 			self.fail()
 		except TypeError:
 			pass
 			
 	def test_create_instance_with_invalid_scorer_argument(self):
 		try:
-			thread = TwitterThread(self.api, self.db, None, self.query, self.args)
+			thread = TwitterThread(self.db, None, self.query, self.args)
 			self.fail()
 		except TypeError:
 			pass
 
 	def test_create_instance_with_invalid_query_argument(self):
 		try:
-			thread = TwitterThread(self.api, self.db, self.scorer, None, self.args)
+			thread = TwitterThread(self.db, self.scorer, None, self.args)
 			self.fail()
 		except TypeError:
 			pass
 
 	def test_create_instance_with_invalid_args_argument(self):
 		try:
-			thread = TwitterThread(self.api, self.db, self.scorer, self.query, None)
+			thread = TwitterThread(self.db, self.scorer, self.query, None)
 			self.fail()
 		except TypeError:
 			pass
 
 	def test_create_instance_with_invalid_args_argument(self):
 		try:
-			thread = TwitterThread(self.api, self.db, self.scorer, self.query, None)
+			thread = TwitterThread(self.db, self.scorer, self.query, None)
 			self.fail()
 		except TypeError:
 			pass
@@ -81,7 +80,7 @@ class test_TwitterThread(unittest.TestCase):
 	def test_create_instance_with_no_location_argument(self):
 		invalid_args = {}
 		try:
-			thread = TwitterThread(self.api, self.db, self.scorer, self.query, invalid_args)
+			thread = TwitterThread(self.db, self.scorer, self.query, invalid_args)
 			self.fail()
 		except KeyError:
 			pass

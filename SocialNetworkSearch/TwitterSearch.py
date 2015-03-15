@@ -1,6 +1,5 @@
 import time
-import twitter
-import sys, os
+from TwitterAPIWrapper import TwitterAPIWrapper
 from Tweet import Tweet
 from dbFacade import dbFacade
 from Scorer import Scorer
@@ -17,8 +16,8 @@ directly.
 class TwitterSearch(object):	
 
 	def __init__(self, api=None, db=None, scorer=None, query=None, args=None):
-		if not isinstance(api, twitter.Api):
-			raise TypeError('Twitter API instance required')
+		if not isinstance(api, TwitterAPIWrapper):
+			raise TypeError('TwitterAPIWrapper instance required')
 		elif not isinstance(db, dbFacade):
 			raise TypeError('dbFacade instance required')
 		elif not isinstance(scorer, Scorer):
@@ -41,8 +40,7 @@ class TwitterSearch(object):
 	Halt operations until api limit has been reset
 	'''
 	def api_rate_limit_sleep(self):
-		rate_limit_status = self.api.GetRateLimitStatus()
-		reset_time = rate_limit_status['resources']['search']['/search/tweets']['reset']
+		reset_time = self.api.get_rate_limit_status()
 		sleep_time = (int)(reset_time - time.time())
 		print ('\n Twitter rate limit exceeded. Sleeping for {0} seconds..'.format(str(sleep_time)))
 		
@@ -57,19 +55,23 @@ class TwitterSearch(object):
 	enable paginated result retrieval.
 	'''
 	def get_100_search_results(self, starting_id=None):
-		params = { 'term' : self.query,
+		params = { 'q' : self.query,
 					'count' : 100,
 					'lang' : 'en',
-					'result_type' : 'recent',
-					'geocode' : self.args['location']
+					'result_type' : 'recent'
 					}
+
+		if self.args['location'] is not None:
+			params['geocode'] = ','.join(map(str, self.args['location']))
+		if self.args['since'] is not None:
+			params['since'] = self.args['since']
+		if self.args['until'] is not None:
+			params['until'] = self.args['until']
 					
 		if starting_id:
-			if not isinstance(starting_id, int):
-				raise TypeError('Starting ID must be an "long" variable')
 			params['max_id'] = starting_id
-			
-		results = self.api.GetSearch(**params)
+
+		results = self.api.search(params)
 		return results
 	
 	'''
@@ -83,8 +85,8 @@ class TwitterSearch(object):
 			raise TypeError('Tweets argument must be a list of Tweets')
 
 		for tweet in tweets:
-			username = tweet.api_tweet_data.user.screen_name.encode('utf-8')
-			post_text = tweet.api_tweet_data.text.encode('utf-8').replace("'", "''")
+			username = tweet.api_tweet_data['user']['screen_name'].encode('utf-8')
+			post_text = tweet.api_tweet_data['text'].encode('utf-8').replace("'", "''")
 			try:
 				score = float(self.scorer.score(post_text))
 			except UnicodeDecodeError:

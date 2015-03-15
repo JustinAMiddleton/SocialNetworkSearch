@@ -1,7 +1,7 @@
 import unittest
 import twitter
 from SocialNetworkSearch.TwitterSearch import TwitterSearch
-from SocialNetworkSearch.TwitterCrawler import TwitterCrawler
+from SocialNetworkSearch.TwitterAPIWrapper import TwitterAPIWrapper
 from SocialNetworkSearch.Tweet import Tweet
 from SocialNetworkSearch.dbFacade import dbFacade
 from SocialNetworkSearch.Scorer import Scorer
@@ -13,13 +13,14 @@ class test_TwitterSearch(unittest.TestCase):
 		words = ['pizza', 'tacos', 'burgers', 'fries']
 		weights = [1,3,2,2]
 		targetSentiment = [1,1,1,1]    
-		self.args = { 'location' : None }
+		self.args = { 'location' : None, 'since' : None, 'until' : None }
 		self.query = "pizza OR tacos OR burgers OR fries"
 	
 		self.db = dbFacade()
 		self.db.connect()
 		self.db.create_keyspace_and_schema()
-		self.api = TwitterCrawler().login()
+		self.api = TwitterAPIWrapper()
+		self.api.login()
 		self.scorer = Scorer(zip(words, weights, targetSentiment))
 	
 	def test_create_instance_with_valid_arguments(self):
@@ -87,15 +88,6 @@ class test_TwitterSearch(unittest.TestCase):
 		search = TwitterSearch(self.api, self.db, self.scorer, self.query, self.args)
 		results = search.get_100_search_results()
 		self.assertEquals(len(results), 100)
-		self.assertIsInstance(results[0], twitter.status.Status)
-	
-	def test_get_100_search_results_with_invalid_starting_id(self):
-		search = TwitterSearch(self.api, self.db, self.scorer, self.query, self.args)
-		try:
-			search.get_100_search_results(starting_id="Invalid")
-			self.fail()
-		except TypeError:
-			pass
 
 	def test_create_Tweet_objects(self):
 		search = TwitterSearch(self.api, self.db, self.scorer, self.query, self.args)
