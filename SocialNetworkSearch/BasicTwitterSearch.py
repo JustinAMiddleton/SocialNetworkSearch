@@ -1,4 +1,5 @@
 import twitter
+from TwitterAPI import TwitterError
 from TwitterSearch import TwitterSearch
 
 '''
@@ -18,12 +19,12 @@ class BasicSearch(TwitterSearch):
 			return self.tweetCount
 
 		try:
-			self.get_next_100_results(results)			
+			self.get_next_100_results(results)		
 		except KeyboardInterrupt:
 			print('\n Twitter: Terminated by user (search)\n')
 		except Exception as e:
 			print('\n Twitter: Terminated due to error\n')
-			print str(e)
+			print(e)
 
 		return self.tweetCount
 		
@@ -35,14 +36,20 @@ class BasicSearch(TwitterSearch):
 			super(BasicSearch, self).store_tweets_in_database(tweets)
 		except KeyboardInterrupt:
 			print ('\n Terminated by user (search)\n')
-		except twitter.TwitterError as e:
-			
+		except TwitterError.TwitterRequestError:
 			try:
 				super(BasicSearch, self).api_rate_limit_sleep()
 			except KeyboardInterrupt:
 				return results
+			return self.get_first_100_results()
+
+		except TwitterError.TwitterConnectionError:
+			try:
+				self.api.login()
+			except KeyboardInterrupt:
+				return results
+			return self.get_first_100_results()
 			
-			return self.get_first_100_results(self.api)
 		return results
 		
 	def get_next_100_results(self, results):
@@ -53,6 +60,11 @@ class BasicSearch(TwitterSearch):
 				results = super(BasicSearch, self).get_100_search_results((int)(lowest_id))
 				tweets = super(BasicSearch, self).create_Tweet_objects(results)
 				super(BasicSearch, self).store_tweets_in_database(tweets)
-			except twitter.TwitterError as e:
+			except TwitterError.TwitterRequestError:
 				super(BasicSearch, self).api_rate_limit_sleep()
 				continue
+			except TwitterError.TwitterConnectionError:
+				self.api.login()
+				continue
+				
+				
