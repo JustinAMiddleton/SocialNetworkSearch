@@ -1,4 +1,3 @@
-from TwitterCrawler import TwitterCrawler
 from TwitterThread import TwitterThread
 from dbFacade import dbFacade
 from Scorer import Scorer
@@ -6,7 +5,6 @@ from TwitterGeoPics.Geocoder import Geocoder
 import time
 import thread
 import threading
-import cassandra
 
 '''
 This class serves as an interface for controlling
