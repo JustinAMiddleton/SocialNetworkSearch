@@ -1,4 +1,3 @@
-import twitter
 from TwitterAPI import TwitterError
 from TwitterSearch import TwitterSearch
 

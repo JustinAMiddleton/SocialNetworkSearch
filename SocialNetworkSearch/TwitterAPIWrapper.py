@@ -24,8 +24,6 @@ class TwitterAPIWrapper(object):
 		return results['statuses']
 	
 	def get_rate_limit_status(self):
-
-
 		rate_limit_status = self.api.request('application/rate_limit_status')
 		
 		reset_time = rate_limit_status.json()['resources']['search']['/search/tweets']['reset']
