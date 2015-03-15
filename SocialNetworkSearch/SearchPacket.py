@@ -56,6 +56,27 @@ class SearchPacket:
 		if len(dirtyWords) != len(dirtyWeights) or len(dirtyWords) != len(dirtySents):
 			raise ValueError("sanitizeAttribute: list length mismatch.")
 			
+		cleanWords,	cleanWeights, cleanSents = self.cleanInfoLists(dirtyWords, 
+			dirtyWeights, dirtySents)
+			
+		if len(cleanWords) < 1:
+			raise ValueError("sanitizeAttribute: no valid words in attribute.")
+			
+		return Attribute(attr.get_name(), attr.get_attr_weight(),
+			cleanWords, cleanWeights, cleanSents)
+	
+	'''
+	Removes any invalid combinations from the lists. This includes those that
+	have bad numbers for weights and sents or words with invalid names.
+		dirtyWords:	list of str
+		dirtyWeights:	list of int (between 1 and 3 inclusive)
+		dirtySents:	list of int (between -1 and 1 inclusive)
+	Returns three lists with all bad combinations removed.
+	
+	All three must be processed at the same time so corresponding information
+	can be discarded if any part of it is bad.
+	'''
+	def cleanInfoLists(self, dirtyWords, dirtyWeights, dirtySents):
 		cleanWords = []
 		cleanWeights = []
 		cleanSents = []
@@ -71,14 +92,10 @@ class SearchPacket:
 				
 			cleanWords.append(word)
 			cleanWeights.append(weight)
-			cleanSents.append(sent)
+			cleanSents.append(sent)	
 			
-		if len(cleanWords) < 1:
-			raise ValueError("sanitizeAttribute: no valid words in attribute.")
-			
-		return Attribute(attr.get_name(), attr.get_attr_weight(),
-			cleanWords, cleanWeights, cleanSents)
-			
+		return cleanWords, cleanWeights, cleanSents
+	
 	'''
 	Generator which provides each attribute, one at a time.
 	'''
