@@ -38,6 +38,7 @@ class Attribute():
 	def set_words(self, words):
 		self.words = words
 
+	'''Expects a list of strings.'''
 	def set_weights(self, weights):
 		newWeights = []
 		for weight in weights:
@@ -49,12 +50,11 @@ class Attribute():
 				newWeights.append(1)
 		self.weights = newWeights
 		
-	'''
-	Like the above function, except a list of numbers is expected.
-	'''
+	'''Expects a list of numbers.'''
 	def set_weights_nums(self, weights):
 		self.weights = weights
 
+	'''Expects a list of strings.'''
 	def set_sentiments(self, sentiments):
 		newSentiments = []
 		for sentiment in sentiments:
@@ -64,9 +64,7 @@ class Attribute():
 				newSentiments.append(-1)
 		self.sentiments = newSentiments
 		
-	'''
-	Like the above function, except a list of numbers is expected.
-	'''
+	'''Expects a list of numbers.'''
 	def set_sentiments_nums(self, sentiments):
 		self.sentiments = sentiments
 
