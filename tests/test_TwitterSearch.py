@@ -88,14 +88,6 @@ class test_TwitterSearch(unittest.TestCase):
 		results = search.get_100_search_results()
 		self.assertEquals(len(results), 100)
 		self.assertIsInstance(results[0], twitter.status.Status)
-	
-	def test_get_100_search_results_with_invalid_starting_id(self):
-		search = TwitterSearch(self.api, self.db, self.scorer, self.query, self.args)
-		try:
-			search.get_100_search_results(starting_id="Invalid")
-			self.fail()
-		except TypeError:
-			pass
 
 	def test_create_Tweet_objects(self):
 		search = TwitterSearch(self.api, self.db, self.scorer, self.query, self.args)

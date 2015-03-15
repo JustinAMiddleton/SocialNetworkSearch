@@ -73,8 +73,6 @@ class TwitterSearch(object):
 			params['until'] = self.args['until']
 					
 		if starting_id:
-			if not isinstance(starting_id, int):
-				raise TypeError('Starting ID must be an "long" variable')
 			params['max_id'] = starting_id
 	
 		#results = self.api.request('search/tweets', params).json()['statuses']
