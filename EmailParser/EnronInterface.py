@@ -8,9 +8,11 @@ class EnronInterface:
 
 	def __init__(self, words, weights, sentiments):
 		self.db = dbFacade()
+		self.words = words
 		self.db.connect()
 		self.db.create_keyspace_and_schema()
 		self.scorer = Scorer(zip(words, weights, sentiments))
+
 
 	def score(self):
 		print "Scoring..\n"
@@ -22,7 +24,7 @@ class EnronInterface:
 		# Retrieve and print top 10 scores
 		users = self.db.get_scored_users()
 		for i in range(0,len(users)):
-			print "[%s] %s" % (str(round(users[i]['score'],1)), users[i]['username'])
+			print "[%s] %s" % (str(round(users[i]['score'], 1)), users[i]['username'])
 
 	@staticmethod
 	def print_statistics(enron_search):
@@ -41,7 +43,7 @@ class EnronInterface:
 		print str(enron_search.total_sentences_matched) + " sentences were matches."
 
 	def main(self):
-		enron_search = EnronSearch.EnronSearch(wordsTest, self.db, self.scorer)
+		enron_search = EnronSearch.EnronSearch(self.words, self.db, self.scorer)
 		enron_search.search_enron()
 
 		EnronInterface.print_statistics(enron_search)
@@ -53,9 +55,9 @@ class EnronInterface:
 
 
 # For testing purposes
-wordsTest = ['tacos', 'pizza', 'burgers', 'fries']
-weightsTest = [1, 3, 2, 2]
-sentimentTest = [1, 1, 1, 1]
+words_test = ['tacos', 'pizza', 'burgers', 'gas']
+weights_test = [1, 3, 2, 2]
+sentiment_test = [1, 1, 1, 1]
 
 if __name__ == "__main__":
-	EnronInterface(wordsTest, weightsTest, sentimentTest).main()
+	EnronInterface(words_test, weights_test, sentiment_test).main()

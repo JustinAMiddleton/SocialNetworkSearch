@@ -1,5 +1,6 @@
 import unittest
 import EmailParser.emailformat as ef
+from sys import platform as _platform
 
 """__author__ = 'LukeLindsey' """
 
@@ -7,8 +8,15 @@ class test_emailformat(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(self):
-		self.email_main_dir = '/users/lukelindsey/Downloads/enron_mail_20110402/maildir/'
-
+		if _platform == "linux" or _platform == "linux2":
+			# linux so probably lab computer
+			self.email_main_dir = 'fill_this in'
+		elif _platform == "darwin":  # OS X
+			self.email_main_dir = '/users/lukelindsey/Downloads/enron_mail_20110402/maildir/'
+		elif _platform == "win32":
+			self.email_main_dir = "C:\\Users\\Brenden\\Downloads\\enron\\enron_mail_20110402\\maildir\\"  # Brenden's machine
+		else:
+			raise ValueError('Machine not supported for tests. Please edit the setUpClass function.')
 	# format_email tests
 	def test_format_email_with_tags_only(self):
 		expected = '\r\nyes'
