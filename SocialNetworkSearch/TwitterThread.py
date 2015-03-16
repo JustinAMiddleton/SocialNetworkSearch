@@ -38,6 +38,8 @@ class TwitterThread(CrawlThread):
 		self.query = query
 		self.args = args
 
+		self.query = query + " -filter:retweets"
+
 		if self.args['location']:
 			self.set_location_argument()
 	def run(self):
