@@ -39,7 +39,6 @@ class Attribute():
 			self.attrWeight = 2
 		else:
 			self.attrWeight = 1
-		print self.attrWeight
 	
 	def set_words(self, words):
 		self.words = words
