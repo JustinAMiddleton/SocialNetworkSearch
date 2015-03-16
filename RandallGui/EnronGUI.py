@@ -4,8 +4,13 @@ Created on Feb 16, 2015
 @author: Randy
 '''
 from Tkinter import *
+from tkFileDialog import *
 class App:
-    
+
+    def set_enron_directory(self):
+	folder = askdirectory(parent=self.frame)
+	print folder
+
     def __init__(self, master):
         attribute1 = "Attribute 1"
         attribute2 = "Attribute 2"
@@ -21,19 +26,25 @@ class App:
         
         frame = Frame(master)
         frame.pack()
+	self.frame = frame
         master.title("Whistleblower Dataset Analysis")
-        master.geometry('300x230-625+200')   
+        master.geometry('410x250-625+200')   
         Label(frame, text="File Location: ").grid(row=0, column=0, pady=4)
         fileLocation = Entry(frame)
         fileLocation.configure(width=14)
         fileLocation.grid(row=0, column=3)
+	self.dir_opt = options = {}
         browse = Button(frame, text="Browse")
         browse.configure(width=10)
         browse.grid(row=0, column=5)
+	browse.config(command=lambda: self.set_enron_directory())
 
         Label(frame, text=attribute1).grid(row=1)
         Button(frame, text="Define Attribute", command=self.defineAttribute).grid(row=1, column=3,
                                              sticky=W, pady=4)
+
+
+
         Button(frame, text="X", command=self.resetAttribute).grid(row=1, column=4, padx=4)
         attr1Weight = StringVar(frame)
         attr1Weight.set("Weight")
