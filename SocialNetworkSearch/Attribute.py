@@ -33,7 +33,13 @@ class Attribute():
 		self.name = name
 		
 	def set_attr_weight(self, weight):
-		self.attrWeight = weight
+		if weight == "High":
+			self.attrWeight = 3
+		elif weight == "Medium":
+			self.attrWeight = 2
+		else:
+			self.attrWeight = 1
+		print self.attrWeight
 	
 	def set_words(self, words):
 		self.words = words

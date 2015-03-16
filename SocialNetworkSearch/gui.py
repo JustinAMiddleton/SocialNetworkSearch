@@ -109,7 +109,7 @@ class App():
 		self.toplevel= Toplevel()
 		self.toplevel.title('Define Attribute')
 		self.toplevel.focus_set()
-		self.toplevel.geometry('450x230-160+200')
+		self.toplevel.geometry('450x270-160+200')
 		self.attribute_frame = Frame(self.toplevel)
 		self.attribute_frame.pack()
 
@@ -117,7 +117,7 @@ class App():
 
 		set_attribute = lambda: self.set_attribute_values(attribute, values)
 
-		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=6, column=0,pady=10, padx=5)			
+		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=7, column=0,pady=10, padx=5)			
 
 	def clear_attribute(self, index):
 		self.attributes[index] = Attribute()
@@ -136,10 +136,16 @@ class App():
 		nameBox.grid(row=0, column=1, pady=5)
 		nameBox.insert(0, attribute.name)
 
+		Label(self.attribute_frame, text="Weight").grid(row=1, column=0, pady=5)
+		attrWeightStr = StringVar(self.toplevel)
+		attrWeightStr.set("Medium")
+		attrWeight = OptionMenu(self.attribute_frame, attrWeightStr, "High", "Medium", "Low")
+		attrWeight.grid(row=1, column=1, sticky=W)
+
 		for i in range(1,6):
-			Label(self.attribute_frame, text="Word "+str(i)).grid(row=i, column=0)
+			Label(self.attribute_frame, text="Word "+str(i)).grid(row=i+1, column=0)
 			wordBox = Entry(self.attribute_frame)
-			wordBox.grid(row=i, column=1)
+			wordBox.grid(row=i+1, column=1)
 
 			weightStr = StringVar(self.toplevel)
 			sentimentStr = StringVar(self.toplevel)
@@ -149,8 +155,8 @@ class App():
 
 			weightBox.config(width=7)
 			sentimentBox.config(width=7)
-			weightBox.grid(row=i, column=2)
-			sentimentBox.grid(row=i, column=3)
+			weightBox.grid(row=i+1, column=2)
+			sentimentBox.grid(row=i+1, column=3)
 
 			if new_attribute:
 				weightStr.set("Weight")
@@ -164,7 +170,7 @@ class App():
 			weightBoxes.append(weightStr)
 			sentimentBoxes.append(sentimentStr)
 
-		return [wordBoxes, weightBoxes, sentimentBoxes, nameBox]
+		return [wordBoxes, weightBoxes, sentimentBoxes, nameBox, attrWeightStr]
 	
 	def set_attribute_values(self, attribute, values):
 		words = self.get_control_values(values[0])
@@ -172,6 +178,7 @@ class App():
 		sentiments = self.get_control_values(values[2])
 	
 		attribute.name = values[3].get()
+		attribute.set_attr_weight(values[4].get())
 		attribute.set_words(words)
 		attribute.set_weights(weights)
 		attribute.set_sentiments(sentiments)
