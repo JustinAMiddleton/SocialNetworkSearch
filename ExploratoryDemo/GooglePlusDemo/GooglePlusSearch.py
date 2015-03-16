@@ -1,118 +1,101 @@
-#need to install requests to run this on your machine
-#would be beneficial to make this portable
-import requests
+from GoogleAPIWrapper import GoogleAPIWrapper as API
+from GooglePost import GooglePost
+import cassandra.protocol
 import sys
 
-#variable for the api key
-GOOGLE_API_KEY = ""
 
-#base url for activity requests to google 
-BASE_URL_GOOGLE_PLUS = "https://www.googleapis.com/plus/v1/activities"
+"""
+This class defines google+ api searching functionality.
+It should be used in place of interacting with the api
+directly.
 
-#variable for tracking the number of requests to google server
-API_REQUEST_COUNT = 0
-
-
-def setApiKey():
-    '''Loads the API key from google_api.txt'''
-    global GOOGLE_API_KEY
-    try:
-        #reads the api key from the google_api.txt file
-        fp = open("google_api.txt")
-        GOOGLE_API_KEY = fp.readline()
-        if GOOGLE_API_KEY == "":
-            print("Please place your API key in the google_api.txt file")
-            print("If you do not have an API Key from GOOGLE, please register for one at: http://developers.google.com")
-            sys.exit(0)
-                
-        fp.close()
-    except IOError:
-        print('API Key not found! Please create and fill up google_api.txt file in the same directory which contains the googleplus module')
-        print('If you do not have an API Key from GOOGLE, please register for one at: http://developers.google.com')
-        sys.exit(0)
-    except Exception as e:
-        print(e)
-        
-def defaultSearch(baseUrl,params):
-
-    global API_REQUEST_COUNT 
-    try:
-        #GET request sent to google
-        r = requests.get(baseUrl,params=params)
-        API_REQUEST_COUNT +=1
-        
-        #response in json format converted into a dictionary
-        response = eval(r.text)
-        return response
-
-    except Exception as e:
-        print("Error for URL: ", r.url)
-        print(e)
-        return { 'status':'ERROR', 'statusInfo':r.status_code }
-
-def mySearch(q,options={}):
-  
-	#set the API key before placed in payload
-    setApiKey() 
-    
-    #dictionary for containing the GET query parameters.
-    payload = {}
-    #setting the query parameter
-    payload["query"] = q
-    #setting the google plus api key
-    payload["key"] = GOOGLE_API_KEY
-    #setting the parameter for the number of returned results to 20
-    payload["maxResults"] = 20
-    #setting the order of the returned results to recent.
-    payload["orderBy"] = "recent"
-    #setting the language parameter to English, so that the returned activity feeds are only in english
-    payload["language"] = "en" 
-    
-    #setting the options if provided, the provided option overrides the default options set above.
-    for option in options:
-        payload[option] = options[option]
-
-    
-    #list for containing the activity items
-    allItems = list([])
-    
-    #response for the first page
-    resp = defaultSearch(BASE_URL_GOOGLE_PLUS,payload)
-    
-    #nextPageToken for looking for further activities
-    nextPageToken = resp["nextPageToken"]
-    allItems += resp["items"]
-    
-    while nextPageToken != "":
-        #nextPageToken for looking for further activities
-        
-        #including nestPageToken in the parameters passed for the GET request
-        payload["pageToken"] = nextPageToken
-        resp = defaultSearch(BASE_URL_GOOGLE_PLUS,payload)
-        try:
-            nextPageToken = resp["nextPageToken"]
-        except KeyError as e:
-            #this means no more next page
-            break
-        allItems += resp["items"]
-        
-        #could deal with it alternatively here instead. Honestly, that would probably be very smart.
-        #Might just want to get the content and date as shown below in the doc string.
-        
-    for item in allItems:
-        #need to do something more meaningful
-        #may need to yield to a generator for performance 
-        print item
-        
-        '''To find the post value, instead of printing item on the search method we could have
-        
-        object = item["object"]
-        content = object["content"]
-
-        date is listed at:
-        updated = item["updated"]'''
-        
-    print "There were " + str(API_REQUEST_COUNT) + " requests in this run."
-                    
+@author: Luke Lindsey
+@date: 14 March 2015
+"""
 
 
+class GooglePlusSearch(object):
+
+	def __init__(self, api_key, db, scorer, query, params={}):
+		self.api_key = api_key
+		self.db = db
+		self.scorer = scorer
+		self.query = query
+		self.params = params
+		self.postCount = 0
+
+	def get_20_search_results(self, next_page_token=None):
+
+		# dictionary for containing the GET query parameters.
+		payload = {}
+		# setting the query parameter
+		payload["query"] = self.query
+		# setting the google plus api key
+		payload["key"] = self.api_key
+		# setting the parameter for the number of returned results to 20
+		payload["maxResults"] = 20
+		# setting the order of the returned results to recent.
+		payload["orderBy"] = "recent"
+		# setting the language parameter to English, so that the returned activity feeds are only in english
+		payload["language"] = "en"
+
+		if next_page_token is not None:
+			payload["pageToken"] = next_page_token
+
+		for param in self.params:
+			payload[param] = self.params[param]
+
+		results = API.default_search(payload)
+		return results
+
+	def store_posts_in_database(self, plus_posts=None):
+
+		if plus_posts is None:
+			raise TypeError('Posts argument required')
+		elif not isinstance(plus_posts, list):
+			raise TypeError('Posts argument must be a list of Google Posts')
+
+		for plus_post in plus_posts:
+			author = plus_post.author.encode('utf-8')
+			try:
+				post = plus_post.post.encode('utf-8').replace("'", "''")
+			except UnicodeDecodeError:
+				post = plus_post.post.decode('utf-8').replace("'", "''")
+				post = post.encode('utf-8')
+			try:
+				score = float(self.scorer.score(post))
+			except UnicodeDecodeError:
+				post = post.decode('utf-8')
+				score = float(self.scorer.score(post))
+
+			try:
+				self.db.add_post(author, 'Google+', post, self.query, score)
+				self.db.add_user(author, 0, 'Google+')
+			except cassandra.protocol.SyntaxException as e:
+				# print "failing at line 74 in GooglePlusSearch"
+				# exc_type, exc_obj, exc_tb = sys.exc_info()
+				# print 'type: ' + str(exc_type)
+				# print(e)
+				# sys.exit(0)
+				post = post + "'''"
+			self.postCount += 1
+
+		print str(self.postCount) + " posts gathered.."
+
+	def create_google_objects(self, search_results=None):
+		if search_results is None:
+			raise TypeError('Search results argument required')
+		elif not isinstance(search_results, list):
+			raise TypeError('Search results argument must be a list of Google+ posts')
+
+		google_posts = []
+		for search_result in search_results:
+			post = self.create_google_object(search_result)
+			google_posts.append(post)
+		return google_posts
+
+	@staticmethod
+	def create_google_object(search_result):
+
+		post = GooglePost(search_result)
+		return post
