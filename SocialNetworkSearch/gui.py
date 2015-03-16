@@ -102,7 +102,7 @@ class App():
 
 		top_users = self.thread.results
 		for i in range(0,len(top_users)):
-			user = Label(results_frame, text="[%s] %s" % (str(round(top_users[i]['score'],1)), top_users[i]['username']))
+			user = Label(results_frame, text="[%s] %s" % (str(round(top_users[i]['score'],5)), top_users[i]['username']))
 			user.grid(row=i, column=0, sticky=W)	
 
 	def define_attribute(self, attribute):

@@ -17,6 +17,8 @@ class SearchPacket:
 	Once the attributes are in, the packet sanitizes them to check for
 	any that have errors (e.g. duplicate names, empty strings for words)
 	and either ignore the words or ignore the attribute altogether.
+	
+	What I expect: a LIST of attributes.
 	'''
 	def __init__(self, attributes):
 		self.attributes = []
@@ -33,6 +35,7 @@ class SearchPacket:
 			raise ValueError("__init__: No valid attributes to search.")
 				
 		self.maxScore = sum([attr.get_attr_weight() for attr in self.attributes])
+	
 	'''
 	Turns a rough attribute from the GUI into one that has exactly as many words
 	as it needs.

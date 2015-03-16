@@ -13,9 +13,7 @@ and if they do, how significant they are to our attribute.
 class Scorer():
 	'''
 	What I expect: a list of tuples
-		First element: word
-		Second element: significance, given in 1, 2, or 3
-		Third element: expected sentiment, either 1 (pos) or -1 (neg)
+		A SearchPacket with attributes.
 	'''
 	def __init__(self, searchPacket):      
 		self.packet = searchPacket
@@ -36,8 +34,8 @@ class Scorer():
 					score += attr.get_weight_num(i)
 			scores.append(float(score) / attr.get_max_score())
 			
-		print scores, text.encode('utf8')
-		return sum(scores)				
+		#print scores, text.encode('utf8')
+		return sum(scores) / float(len(scores))			
 		
 		'''Goes through each word in the text, checks if it's in it.
 		for word in blob.words:
