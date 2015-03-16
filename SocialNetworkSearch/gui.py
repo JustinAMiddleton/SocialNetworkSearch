@@ -39,7 +39,7 @@ class App():
 		self.frame.pack()
 		self.frame.grid(pady=15, padx=15)
 		master.title("Whistleblower Analysis")
-		master.geometry('460x370-625+200')
+		master.geometry('500x370-625+200')
 
 		self.initialize_attributes()
 		self.create_main_window_controls()
@@ -105,7 +105,7 @@ class App():
 			user = Label(results_frame, text="[%s] %s" % (str(round(top_users[i]['score'],5)), top_users[i]['username']))
 			user.grid(row=i, column=0, sticky=W)	
 
-	def define_attribute(self, attribute):
+	def define_attribute(self, attribute, index):
 		self.toplevel= Toplevel()
 		self.toplevel.title('Define Attribute')
 		self.toplevel.focus_set()
@@ -115,12 +115,13 @@ class App():
 
 		values = self.create_attribute_controls(attribute)
 
-		set_attribute = lambda: self.set_attribute_values(attribute, values)
+		set_attribute = lambda: self.set_attribute_values(attribute, values, index)
 
 		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=7, column=0,pady=10, padx=5)			
 
 	def clear_attribute(self, index):
 		self.attributes[index] = Attribute()
+		self.attribute_labels[index]['text'] = "Attribute " + str(index+1)
 
 	def create_attribute_controls(self, attribute):	
 		wordBoxes = []
@@ -172,7 +173,7 @@ class App():
 
 		return [wordBoxes, weightBoxes, sentimentBoxes, nameBox, attrWeightStr]
 	
-	def set_attribute_values(self, attribute, values):
+	def set_attribute_values(self, attribute, values, index):
 		words = self.get_control_values(values[0])
 		weights = self.get_control_values(values[1])
 		sentiments = self.get_control_values(values[2])
@@ -182,6 +183,8 @@ class App():
 		attribute.set_words(words)
 		attribute.set_weights(weights)
 		attribute.set_sentiments(sentiments)
+
+		self.attribute_labels[index]['text'] = attribute.name
 
 	def get_control_values(self, controls):
 		values = []
@@ -251,28 +254,28 @@ class App():
 	def create_attribute_label_controls(self, frame):
 		self.attribute_labels = []
 		for i in range(1, len(self.attributes)+1):
-			attr_label = Label(frame, text="Attribute "+str(i))
-			attr_label.grid(row=i, column=0)	
+			attr_label = Label(frame, text="Attribute "+str(i), width=10, anchor=W)
+			attr_label.grid(row=i, column=0, sticky=W, padx=10)	
 			self.attribute_labels.append(attr_label)
 	
 	def create_attribute_button_controls(self, frame):
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[0])).grid(
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[0], 0)).grid(
 				    row=1, column=1, pady=4)
 		Button(frame, text="X", command=lambda: self.clear_attribute(0)).grid(row=1, column=2, padx=5)
 
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[1])).grid(
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[1], 1)).grid(
 				    row=2, column=1, pady=4)
 		Button(frame, text="X", command=lambda: self.clear_attribute(1)).grid(row=2, column=2, padx=5)
 
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[2])).grid(
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[2], 2)).grid(
 				    row=3, column=1, pady=4)
 		Button(frame, text="X", command=lambda: self.clear_attribute(2)).grid(row=3, column=2, padx=5)
 
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[3])).grid(
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[3], 3)).grid(
 				    row=4, column=1, pady=4)
 		Button(frame, text="X", command=lambda: self.clear_attribute(3)).grid(row=4, column=2, padx=5)
 
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[4])).grid(
+		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[4], 4)).grid(
 				    row=5, column=1, pady=4)
 		Button(frame, text="X", command=lambda: self.clear_attribute(4)).grid(row=5, column=2, padx=5)
 
