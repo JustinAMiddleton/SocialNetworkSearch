@@ -84,17 +84,9 @@ class TwitterSearch(object):
 		elif not isinstance(tweets, list):
 			raise TypeError('Tweets argument must be a list of Tweets')
 
-		for tweet in tweets:
-			username = tweet.api_tweet_data['user']['screen_name'].encode('utf-8')
-			post_text = tweet.api_tweet_data['text'].encode('utf-8').replace("'", "''")
-			try:
-				score = float(self.scorer.score(post_text))
-			except UnicodeDecodeError:
-				post_text = post_text.decode('utf-8')
-				score = float(self.scorer.score(post_text))
-			
-			self.db.add_post(username, 'Twitter', post_text, self.query, score)
-			self.db.add_user(username, 0, 'Twitter')
+		for tweet in tweets:			
+			self.db.add_post(tweet.username, 'Twitter', tweet.content, self.query, tweet.score)
+			self.db.add_user(tweet.username, 0, 'Twitter')
 			self.tweetCount += 1
 
 		print str(self.tweetCount) + " tweets gathered.."
@@ -111,13 +103,6 @@ class TwitterSearch(object):
 
 		tweets = []
 		for search_result in search_results:
-			tweet = self.create_Tweet_object(search_result)
+			tweet = Tweet(search_result, self.scorer)
 			tweets.append(tweet)
 		return tweets
-
-	def create_Tweet_object(self, search_result):
-		media_urls = None
-		geocode = None
-			
-		tweet = Tweet(search_result, media_urls, geocode)
-		return tweet
