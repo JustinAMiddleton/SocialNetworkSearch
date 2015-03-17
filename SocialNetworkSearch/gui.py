@@ -10,6 +10,7 @@ from Tkinter import *
 from Interface import Interface
 from Attribute import Attribute
 from SearchPacket import SearchPacket
+from AttributeWindow import AttributeWindow
 import time
 import threading
 import thread
@@ -133,7 +134,9 @@ class App():
 		
 
 	def define_attribute(self, attribute, index):
-		self.toplevel= Toplevel()
+		attr_window = AttributeWindow()
+		attr_window.create_attribute_window(self.attributes, self.attribute_labels, index)
+		'''self.toplevel= Toplevel()
 		self.toplevel.title('Define Attribute')
 		self.toplevel.focus_set()
 		self.toplevel.geometry('450x270-160+200')
@@ -144,7 +147,7 @@ class App():
 
 		set_attribute = lambda: self.set_attribute_values(attribute, values, index)
 
-		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=7, column=0,pady=10, padx=5)			
+		Button(self.attribute_frame, text="Save", command=set_attribute).grid(row=7, column=0,pady=10, padx=5)'''		
 
 	def clear_attribute(self, index):
 		self.attributes[index] = Attribute()
