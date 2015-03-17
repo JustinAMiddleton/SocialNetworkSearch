@@ -193,25 +193,10 @@ class App():
 			self.attribute_labels.append(attr_label)
 	
 	def create_attribute_button_controls(self, frame):
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[0], 0)).grid(
-				    row=1, column=1, pady=4)
-		Button(frame, text="X", command=lambda: self.clear_attribute(0)).grid(row=1, column=2, padx=5)
-
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[1], 1)).grid(
-				    row=2, column=1, pady=4)
-		Button(frame, text="X", command=lambda: self.clear_attribute(1)).grid(row=2, column=2, padx=5)
-
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[2], 2)).grid(
-				    row=3, column=1, pady=4)
-		Button(frame, text="X", command=lambda: self.clear_attribute(2)).grid(row=3, column=2, padx=5)
-
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[3], 3)).grid(
-				    row=4, column=1, pady=4)
-		Button(frame, text="X", command=lambda: self.clear_attribute(3)).grid(row=4, column=2, padx=5)
-
-		Button(frame, text=self.defAtt, command=lambda: self.define_attribute(self.attributes[4], 4)).grid(
-				    row=5, column=1, pady=4)
-		Button(frame, text="X", command=lambda: self.clear_attribute(4)).grid(row=5, column=2, padx=5)
+		for i in range(0, 5):
+			Button(frame, text=self.defAtt, command=lambda i=i: self.define_attribute(self.attributes[i], i)).grid(
+				    row=i+1, column=1, pady=4)
+			Button(frame, text="X", command=lambda i=i: self.clear_attribute(i)).grid(row=i+1, column=2, padx=5)
 
 
 root=Tk()
