@@ -12,6 +12,7 @@ from Attribute import Attribute
 from SearchPacket import SearchPacket
 from GuiThread import GuiThread
 from AttributeWindow import AttributeWindow
+from ResultsWindow import ResultsWindow
 import time
 import threading
 import thread
@@ -28,32 +29,12 @@ class App():
 		master.title("Whistleblower Analysis")
 		master.geometry('500x370-625+200')
 
-		self.initialize_attributes()
+		self.initialize_attribute_objects()
 		self.create_main_window_controls()
-	
-
-	def initialize_attributes(self):
-		for i in range(0, 5): 
-			self.attributes.append(Attribute())
 
 	def search(self):
-		args = {}
-
-		args['location'] = None
-		args['until'] = None
-		args['since'] = None
-
-		if not self.location.get() == "":
-			args['location'] = self.location.get()
-		if not self.date_until.get() in ("","yyyy-mm-dd"):
-			args['until'] = self.date_until.get()
-		if not self.date_since.get() in ("","yyyy-mm-dd"):
-			print self.date_since.get()	
-			args['since'] = self.date_since.get()
-
 		self.start_button.config(state = DISABLED)
-
-		self.thread = GuiThread(self.attributes, args)
+		self.thread = GuiThread(self.attributes, self.get_search_arguments())
 		self.thread.start()
 		
 		while self.thread.interface == None:
@@ -70,62 +51,44 @@ class App():
 			self.thread.join()
 	
 		self.show_results_window()
-		#self.interface.db.close()
-
 		self.start_button.config(state = NORMAL)
+
+	def initialize_attribute_objects(self):
+		for i in range(0, 5): 
+			self.attributes.append(Attribute())
+
+	def show_attribute_window(self, attribute, index):
+		attr_window = AttributeWindow()
+		attr_window.create_attribute_window(self.attributes, self.attribute_labels, index)
+
+	def show_results_window(self):
+		results_window = ResultsWindow(self.interface.db)
+		results_window.create_results_window()	
+
+	def clear_attribute(self, index):
+		self.attributes[index] = Attribute()
+		self.attribute_labels[index]['text'] = "Attribute " + str(index+1)
+
+	def get_search_arguments(self):
+		args = {}
+		args['location'] = None
+		args['until'] = None
+		args['since'] = None
+
+		if not self.location.get() == "":
+			args['location'] = self.location.get()
+		if not self.date_until.get() in ("","yyyy-mm-dd"):
+			args['until'] = self.date_until.get()
+		if not self.date_since.get() in ("","yyyy-mm-dd"):
+			print self.date_since.get()	
+			args['since'] = self.date_since.get()
+
+		return args
 
 	def create_main_window_controls(self):
 		self.create_main_window_attribute_controls()
 		self.create_main_window_options_controls()
 		self.create_main_window_command_controls()
-	
-	def show_results_window(self):
-		toplevel= Toplevel()
-		toplevel.title('Results')
-		toplevel.focus_set()
-		toplevel.geometry('320x320-160+200')
-		results_frame = Frame(toplevel)
-		results_frame.pack()
-
-		top_users = self.thread.results
-		postButtons = []
-		for i in range(0,len(top_users)):
-			Label(results_frame, text=i+1).grid(row=i, column=0)
-	
-			user = Label(results_frame, text="[%s] %s" % 
-				(str(round(top_users[i]['score'],5)), top_users[i]['username']))
-			user.grid(row=i, column=1, sticky=W)	
-			
-			postButton = Button(results_frame, text="Show Posts", 
-					command=lambda i=i: self.show_posts(top_users[i]['username']))
-			postButton.grid(row=i, column=2)
-
-	def show_posts(self, username):
-		root = Tk()
-		root.geometry('-160+200')
-		root.title("%s's Posts" % username)
-		scrollbar_x = Scrollbar(root, orient=HORIZONTAL)
-		scrollbar_x.pack(side=BOTTOM, fill=X)
-
-		listbox = Listbox(root, width=50)
-		listbox.pack()
-
-		posts = self.interface.db.get_posts(username)
-
-		for i in range(len(posts)):
-		    listbox.insert(END, posts[i]['content'].encode('utf-8'))
-
-		listbox.config(xscrollcommand=scrollbar_x.set)
-		scrollbar_x.config(command=listbox.xview)
-		
-
-	def define_attribute(self, attribute, index):
-		attr_window = AttributeWindow()
-		attr_window.create_attribute_window(self.attributes, self.attribute_labels, index)	
-
-	def clear_attribute(self, index):
-		self.attributes[index] = Attribute()
-		self.attribute_labels[index]['text'] = "Attribute " + str(index+1)
 
 	def create_main_window_attribute_controls(self):
 		self.defAtt = "Define Attribute"
@@ -136,41 +99,6 @@ class App():
 
 		self.create_attribute_label_controls(attributes)
 		self.create_attribute_button_controls(attributes)
-
-	def create_main_window_options_controls(self):
-		options = Frame(self.frame)
-		options.grid(row=1, column=3, rowspan=7, columnspan=1, padx=10, sticky=S)
-
-		Label(options, text="Options", font = "Verdana 10 bold").grid(row=0, pady=5, sticky=W)
-		Label(options, text="Web Sites").grid(row=1, pady=5, sticky=W)
-		var1 = IntVar()
-		Checkbutton(options, text="Twitter", variable=var1).grid(row=2,
-				    sticky=W, padx=15)
-		var2 = IntVar()
-		googleCheck = Checkbutton(options, text="Google+", variable=var2)
-		googleCheck.config(state = DISABLED)
-		googleCheck.grid(row=3, sticky=W, padx=15)
-
-		Label(options, text="Location").grid(row=4, sticky=W, pady=5, padx=5)
-		self.location = Entry(options, width=15)
-		self.location.grid(row=5, padx=15)
-
-		Label(options, text="Since Date").grid(row=6, sticky=W, pady=5, padx=5)
-		self.date_since = Entry(options, width=15)
-		self.date_since.insert(0, "yyyy-mm-dd")
-		self.date_since.grid(row=7, padx=15)
-
-		Label(options, text="Until Date").grid(row=8, sticky=W, pady=5, padx=5)
-		self.date_until = Entry(options, width=15)
-		self.date_until.insert(0, "yyyy-mm-dd")
-		self.date_until.grid(row=9, padx=15)
-
-		'''self.date_until=StringVar(options)
-		self.date_until.set("Select Date")
-		datePicker = OptionMenu(options, self.date_until, "Last 30 Days",
-				    "Last 90 Days", "Past Year")
-		datePicker.grid(row=6, pady=10, padx=5, sticky=W)
-		#datePicker.config(state = DISABLED)'''
 	
 	def create_main_window_command_controls(self):
 		buttons = Frame(self.frame)
@@ -194,9 +122,39 @@ class App():
 	
 	def create_attribute_button_controls(self, frame):
 		for i in range(0, 5):
-			Button(frame, text=self.defAtt, command=lambda i=i: self.define_attribute(self.attributes[i], i)).grid(
+			Button(frame, text=self.defAtt, command=lambda i=i: self.show_attribute_window(self.attributes[i], i)).grid(
 				    row=i+1, column=1, pady=4)
 			Button(frame, text="X", command=lambda i=i: self.clear_attribute(i)).grid(row=i+1, column=2, padx=5)
+
+	def create_main_window_options_controls(self):
+		options = Frame(self.frame)
+		options.grid(row=1, column=3, rowspan=7, columnspan=1, padx=10, sticky=S)
+
+		Label(options, text="Options", font = "Verdana 10 bold").grid(row=0, pady=5, sticky=W)
+		Label(options, text="Web Sites").grid(row=1, pady=5, sticky=W)
+
+		twitter_enabled = IntVar()
+		Checkbutton(options, text="Twitter", variable=twitter_enabled).grid(row=2,
+				    sticky=W, padx=15)
+
+		google_enabled = IntVar()
+		googleCheck = Checkbutton(options, text="Google+", variable=google_enabled)
+		googleCheck.config(state = DISABLED)
+		googleCheck.grid(row=3, sticky=W, padx=15)
+
+		Label(options, text="Location").grid(row=4, sticky=W, pady=5, padx=5)
+		self.location = Entry(options, width=15)
+		self.location.grid(row=5, padx=15)
+
+		Label(options, text="Since Date").grid(row=6, sticky=W, pady=5, padx=5)
+		self.date_since = Entry(options, width=15)
+		self.date_since.insert(0, "yyyy-mm-dd")
+		self.date_since.grid(row=7, padx=15)
+
+		Label(options, text="Until Date").grid(row=8, sticky=W, pady=5, padx=5)
+		self.date_until = Entry(options, width=15)
+		self.date_until.insert(0, "yyyy-mm-dd")
+		self.date_until.grid(row=9, padx=15)
 
 
 root=Tk()

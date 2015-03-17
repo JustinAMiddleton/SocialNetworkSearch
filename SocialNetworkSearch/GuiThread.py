@@ -13,7 +13,7 @@ class GuiThread(threading.Thread):
 		self.interface = Interface(self.search_packet)
 		self.query = self.search_packet.getQuery()
 		self.interface.search(self.query, self.args)
-		self.results = self.interface.score()
+		self.interface.score()
 		time.sleep(1)
 	def stop(self):
 		self.interface.stop_search()

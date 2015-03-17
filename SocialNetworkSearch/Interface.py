@@ -61,9 +61,6 @@ class Interface:
 		scores = self.db.calculate_user_scores(users)
 		self.db.populate_user_scores(users, scores)
 
-		users = self.db.get_scored_users()
-		return users
-
 	'''
 	Takes wordlist and forms OR search query string.
 	 input 	: ["word1", "word2", "word3"]
