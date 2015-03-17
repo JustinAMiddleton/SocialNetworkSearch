@@ -3,6 +3,13 @@ from Attribute import Attribute
 from SearchPacket import SearchPacket
 from Tkinter import *
 
+'''
+This class contains code for the Define Attribute GUI window.
+
+@author: Brenden Romanowski
+@date: 17 March 2015
+'''
+
 class AttributeWindow:
 	
 	def create_attribute_window(self, attributes, attribute_labels, index):

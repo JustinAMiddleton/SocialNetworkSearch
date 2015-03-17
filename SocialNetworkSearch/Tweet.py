@@ -1,5 +1,12 @@
 import twitter
 
+'''
+This class holds data representing one tweet received by
+searching the Twitter API.
+
+@author: Brenden Romanowski
+@date: 24 Feb 2015
+'''
 class Tweet(object):
 
 	def __init__(self, api_data, scorer):

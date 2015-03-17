@@ -1,5 +1,12 @@
 from Tkinter import *
 
+'''
+This class contains code for the Search Results GUI window.
+
+@author: Brenden Romanowski
+@date: 17 March 2015
+'''
+
 class ResultsWindow:
 
 	def __init__(self, db):
